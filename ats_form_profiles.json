@@ -1,0 +1,78 @@
+{
+  "_comment": "ATS detection + field selector profiles for application_prep.py. Selectors are CSS. Only text/file inputs are ever touched; nothing here may target a submit-like control. 'generic' is the fallback merged under every profile.",
+  "detection": [
+    {"ats": "linkedin", "host_pattern": "(^|\\.)linkedin\\.com$"},
+    {"ats": "greenhouse", "host_pattern": "(^|\\.)greenhouse\\.io$"},
+    {"ats": "workday", "host_pattern": "(^|\\.)myworkdayjobs\\.com$|(^|\\.)myworkdaysite\\.com$|(^|\\.)workday\\.com$"},
+    {"ats": "lever", "host_pattern": "(^|\\.)lever\\.co$"},
+    {"ats": "ashby", "host_pattern": "(^|\\.)ashbyhq\\.com$"},
+    {"ats": "smartrecruiters", "host_pattern": "(^|\\.)smartrecruiters\\.com$"},
+    {"ats": "workable", "host_pattern": "(^|\\.)workable\\.com$"}
+  ],
+  "generic": {
+    "first_name": ["input[name*='first' i]", "input[id*='first' i]", "input[placeholder*='first' i]", "input[autocomplete='given-name']"],
+    "last_name": ["input[name*='last' i]", "input[id*='last' i]", "input[placeholder*='last' i]", "input[autocomplete='family-name']"],
+    "full_name": ["input[name='name']", "input[id='name']", "input[autocomplete='name']", "input[placeholder*='full name' i]"],
+    "email": ["input[type='email']", "input[name*='email' i]", "input[autocomplete='email']"],
+    "phone": ["input[type='tel']", "input[name*='phone' i]", "input[autocomplete='tel']"],
+    "linkedin": ["input[name*='linkedin' i]", "input[id*='linkedin' i]", "input[placeholder*='linkedin' i]"],
+    "github": ["input[name*='github' i]", "input[id*='github' i]", "input[placeholder*='github' i]"],
+    "portfolio": ["input[name*='portfolio' i]", "input[name*='website' i]", "input[id*='portfolio' i]"],
+    "location": ["input[name*='location' i]", "input[id*='location' i]", "input[name*='city' i]"],
+    "resume_path": ["input[type='file']"]
+  },
+  "profiles": {
+    "greenhouse": {
+      "first_name": ["#first_name", "input[name='job_application[first_name]']"],
+      "last_name": ["#last_name", "input[name='job_application[last_name]']"],
+      "email": ["#email", "input[name='job_application[email]']"],
+      "phone": ["#phone", "input[name='job_application[phone]']"],
+      "linkedin": ["input[name*='linkedin' i]", "#question_linkedin"],
+      "resume_path": ["input[type='file'][name*='resume' i]", "#resume", "input[type='file']"]
+    },
+    "lever": {
+      "full_name": ["input[name='name']"],
+      "email": ["input[name='email']"],
+      "phone": ["input[name='phone']"],
+      "location": ["input[name='location']"],
+      "linkedin": ["input[name='urls[LinkedIn]']"],
+      "github": ["input[name='urls[GitHub]']"],
+      "portfolio": ["input[name='urls[Portfolio]']"],
+      "resume_path": ["input[type='file'][name='resume']", "input[type='file']"]
+    },
+    "ashby": {
+      "full_name": ["input[name='_systemfield_name']", "input[id='_systemfield_name']"],
+      "email": ["input[name='_systemfield_email']", "input[id='_systemfield_email']", "input[type='email']"],
+      "phone": ["input[name='_systemfield_phone']", "input[type='tel']"],
+      "location": ["input[name='_systemfield_location']"],
+      "linkedin": ["input[name*='linkedin' i]", "input[id*='linkedin' i]", "input[placeholder*='linkedin' i]"],
+      "github": ["input[name*='github' i]", "input[placeholder*='github' i]"],
+      "resume_path": ["input[type='file'][name='_systemfield_resume']", "input[type='file']"]
+    },
+    "smartrecruiters": {
+      "first_name": ["input[name='firstName']", "#first-name"],
+      "last_name": ["input[name='lastName']", "#last-name"],
+      "email": ["input[name='email']", "#email"],
+      "phone": ["input[name='phoneNumber']", "input[type='tel']"],
+      "location": ["input[name='location']"],
+      "linkedin": ["input[name*='linkedin' i]"],
+      "resume_path": ["input[type='file']"]
+    },
+    "workable": {
+      "first_name": ["input[name='firstname']", "#firstname"],
+      "last_name": ["input[name='lastname']", "#lastname"],
+      "email": ["input[name='email']", "#email"],
+      "phone": ["input[name='phone']", "#phone"],
+      "linkedin": ["input[name*='linkedin' i]"],
+      "resume_path": ["input[type='file']"]
+    },
+    "workday": {
+      "first_name": ["input[data-automation-id='legalNameSection_firstName']"],
+      "last_name": ["input[data-automation-id='legalNameSection_lastName']"],
+      "email": ["input[data-automation-id='email']", "input[type='email']"],
+      "phone": ["input[data-automation-id='phone-number']", "input[type='tel']"],
+      "resume_path": ["input[data-automation-id='file-upload-input-ref']", "input[type='file']"]
+    },
+    "unknown": {}
+  }
+}
