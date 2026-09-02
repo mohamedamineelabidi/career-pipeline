@@ -1,0 +1,128 @@
+{
+  "_comment": "Public career/job RSS/Atom feeds and public JSON boards relevant to Data/AI roles. Read-only; parsed by rss_sources.py. type: rss (feedparser) | ashby_json | workable_json | lever_json | greenhouse_json | remoteok_json (public postings APIs). Disabled feeds are skipped. Verified 2026-09-02: WeWorkRemotely returns 403 to non-browser clients (kept disabled, not spoofed); RemoteOK .rss endpoints are 410 Gone -> public /api used instead.",
+  "feeds": [
+    {
+      "name": "Python.org Jobs",
+      "url": "https://www.python.org/jobs/feed/rss/",
+      "type": "rss",
+      "enabled": true,
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "name": "Jobicy - Data Science",
+      "url": "https://jobicy.com/?feed=job_feed&job_categories=data-science",
+      "type": "rss",
+      "enabled": true,
+      "tags": [
+        "remote",
+        "data"
+      ]
+    },
+    {
+      "name": "Himalayas - Remote (Data/AI filter)",
+      "url": "https://himalayas.app/jobs/rss",
+      "type": "rss",
+      "enabled": true,
+      "tags": [
+        "remote"
+      ],
+      "keyword_filter": [
+        "data",
+        "machine learning",
+        " ai ",
+        " ml ",
+        "analytics"
+      ]
+    },
+    {
+      "name": "RemoteOK - public API (Data/AI filter)",
+      "url": "https://remoteok.com/api",
+      "type": "remoteok_json",
+      "enabled": true,
+      "tags": [
+        "remote"
+      ],
+      "keyword_filter": [
+        "data",
+        "machine learning",
+        " ai ",
+        " ml ",
+        "analytics",
+        "python"
+      ]
+    },
+    {
+      "name": "Workable - Hugging Face",
+      "url": "https://apply.workable.com/api/v3/accounts/huggingface/jobs",
+      "type": "workable_json",
+      "enabled": false,
+      "tags": [
+        "ai"
+      ],
+      "_comment": "404 on 2026-09-02 (board slug not public); disabled."
+    },
+    {
+      "name": "Ashby - Mistral AI",
+      "url": "https://api.ashbyhq.com/posting-api/job-board/mistral",
+      "type": "ashby_json",
+      "enabled": false,
+      "tags": [
+        "ai"
+      ],
+      "_comment": "404 on 2026-09-02 (board slug not public); disabled."
+    },
+    {
+      "name": "Ashby - Deepgram",
+      "url": "https://api.ashbyhq.com/posting-api/job-board/deepgram",
+      "type": "ashby_json",
+      "enabled": true,
+      "tags": [
+        "ai"
+      ]
+    },
+    {
+      "name": "WeWorkRemotely - Data / AI",
+      "url": "https://weworkremotely.com/categories/remote-data-science-jobs.rss",
+      "type": "rss",
+      "enabled": false,
+      "tags": [
+        "remote",
+        "data"
+      ],
+      "_comment": "403 to non-browser clients (2026-09-02); do not spoof."
+    },
+    {
+      "name": "WeWorkRemotely - Machine Learning / AI",
+      "url": "https://weworkremotely.com/categories/remote-machine-learning-ai-jobs.rss",
+      "type": "rss",
+      "enabled": false,
+      "tags": [
+        "remote",
+        "ai"
+      ],
+      "_comment": "403 to non-browser clients (2026-09-02); do not spoof."
+    },
+    {
+      "name": "Lever - Anthropic (public JSON)",
+      "url": "https://api.lever.co/v0/postings/anthropic?mode=json",
+      "type": "lever_json",
+      "enabled": false,
+      "tags": [
+        "ai"
+      ],
+      "_comment": "Example Lever public postings; enable if wanted."
+    },
+    {
+      "name": "Greenhouse - Scale AI (public JSON)",
+      "url": "https://boards-api.greenhouse.io/v1/boards/scaleai/jobs?content=true",
+      "type": "greenhouse_json",
+      "enabled": false,
+      "tags": [
+        "ai"
+      ],
+      "_comment": "Example Greenhouse public board JSON; enable if wanted."
+    }
+  ]
+}

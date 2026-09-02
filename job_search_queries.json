@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "notes": "Discovery queries for job_sources.py (JobSpy). Read-only public listings; never applies.",
+  "queries": [
+    {
+      "name": "Morocco — Data/AI engineer",
+      "search_term": "data engineer OR machine learning engineer OR AI engineer",
+      "location": "Rabat, Morocco",
+      "country": "morocco",
+      "sites": [
+        "linkedin",
+        "indeed"
+      ],
+      "hours_old": 168,
+      "job_type": null,
+      "is_remote": false,
+      "results_wanted": 25
+    },
+    {
+      "name": "Morocco — GenAI / LLM",
+      "search_term": "generative AI engineer OR LLM engineer OR NLP engineer",
+      "location": "Casablanca, Morocco",
+      "country": "morocco",
+      "sites": [
+        "linkedin",
+        "indeed"
+      ],
+      "hours_old": 168,
+      "job_type": null,
+      "is_remote": false,
+      "results_wanted": 20
+    },
+    {
+      "name": "Morocco — internship / PFE",
+      "search_term": "stage PFE data science OR stage machine learning OR stage intelligence artificielle",
+      "location": "Morocco",
+      "country": "morocco",
+      "sites": [
+        "linkedin",
+        "indeed"
+      ],
+      "hours_old": 336,
+      "job_type": "internship",
+      "is_remote": false,
+      "results_wanted": 20
+    },
+    {
+      "name": "France — junior Data/ML engineer",
+      "search_term": "ingénieur data junior OR machine learning engineer junior OR data engineer 2 ans",
+      "location": "Paris, France",
+      "country": "france",
+      "sites": [
+        "linkedin",
+        "indeed"
+      ],
+      "hours_old": 168,
+      "job_type": null,
+      "is_remote": false,
+      "results_wanted": 25
+    },
+    {
+      "name": "France — GenAI engineer",
+      "search_term": "ingénieur IA générative OR LLM engineer OR NLP engineer",
+      "location": "France",
+      "country": "france",
+      "sites": [
+        "linkedin",
+        "indeed"
+      ],
+      "hours_old": 168,
+      "job_type": null,
+      "is_remote": false,
+      "results_wanted": 20
+    },
+    {
+      "name": "Quebec — Data/AI engineer",
+      "search_term": "data engineer OR machine learning engineer OR AI engineer",
+      "location": "Montreal, QC, Canada",
+      "country": "canada",
+      "sites": [
+        "linkedin",
+        "indeed"
+      ],
+      "hours_old": 168,
+      "job_type": null,
+      "is_remote": false,
+      "results_wanted": 25
+    },
+    {
+      "name": "Canada — junior ML / GenAI",
+      "search_term": "junior machine learning engineer OR generative AI engineer OR data scientist 1-3 years",
+      "location": "Canada",
+      "country": "canada",
+      "sites": [
+        "linkedin",
+        "indeed"
+      ],
+      "hours_old": 168,
+      "job_type": null,
+      "is_remote": false,
+      "results_wanted": 20
+    },
+    {
+      "name": "UAE — Data/AI engineer",
+      "search_term": "data engineer OR machine learning engineer OR AI engineer",
+      "location": "Dubai, United Arab Emirates",
+      "country": "united arab emirates",
+      "sites": [
+        "linkedin",
+        "indeed"
+      ],
+      "hours_old": 168,
+      "job_type": null,
+      "is_remote": false,
+      "results_wanted": 25
+    },
+    {
+      "name": "Remote — Data/ML engineer",
+      "search_term": "remote data engineer OR remote machine learning engineer",
+      "location": "",
+      "country": "france",
+      "sites": [
+        "linkedin",
+        "indeed"
+      ],
+      "hours_old": 168,
+      "job_type": null,
+      "is_remote": true,
+      "results_wanted": 25
+    },
+    {
+      "name": "Remote — GenAI / LLM engineer",
+      "search_term": "remote generative AI engineer OR remote LLM engineer",
+      "location": "",
+      "country": "canada",
+      "sites": [
+        "linkedin",
+        "indeed"
+      ],
+      "hours_old": 168,
+      "job_type": null,
+      "is_remote": true,
+      "results_wanted": 20
+    }
+  ]
+}
