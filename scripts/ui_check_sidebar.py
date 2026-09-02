@@ -1,0 +1,17 @@
+from playwright.sync_api import sync_playwright
+with sync_playwright() as p:
+    b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1460, "height": 760})
+    errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.goto("http://127.0.0.1:8786/pipeline_v2.html#/tracker"); pg.wait_for_selector(".kcard", timeout=20000); pg.wait_for_timeout(800)
+    print("card texts:", pg.evaluate("[...document.querySelectorAll('.kanban-col[data-status=eligible] .kcard')].slice(0,2).map(c => c.innerText.split('\\n').join(' | '))"))
+    print("listing links:", pg.evaluate("document.querySelectorAll('.kcard a.compact-button').length"))
+    print("before:", pg.evaluate("[document.body.className, document.querySelector('main').getBoundingClientRect().left]"))
+    pg.click("#sidebar-toggle"); pg.wait_for_timeout(400)
+    print("after close:", pg.evaluate("[document.body.className, document.querySelector('main').getBoundingClientRect().left, document.querySelector('#sidebar-toggle').getAttribute('aria-label')]"))
+    pg.screenshot(path="/path/to/AppData/Local/Temp/pw_tracker_closed.png")
+    pg.reload(); pg.wait_for_selector(".kcard", timeout=20000)
+    print("persisted after reload:", pg.evaluate("document.body.className"))
+    pg.click("#sidebar-toggle"); pg.wait_for_timeout(400)
+    print("after open:", pg.evaluate("[document.body.className, document.querySelector('main').getBoundingClientRect().left]"))
+    pg.screenshot(path="/path/to/AppData/Local/Temp/pw_tracker.png")
+    print("errors", errs); b.close()
