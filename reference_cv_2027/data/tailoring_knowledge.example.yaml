@@ -1,0 +1,108 @@
+version: 1
+candidate: Jordan Rivera
+purpose: Evidence-backed role matching, CV tailoring, and self-scoring.
+reference_convention: "experience.<id>.bullet_<1-based index>, projects.<id>.bullet_<1-based index>, or a canonical section path"
+
+source_of_truth:
+  career_facts: data/career_master.yaml
+  conflicts_and_exclusions: data/evidence_register.yaml
+  precedence:
+    - career_master.yaml controls facts and public claims.
+    - evidence_register.yaml controls conflicts, exclusions, and application safety.
+    - This file controls selection and scoring only; it must never create career facts.
+
+application_control:
+  final_approval_required: true
+  submission_mode: manual_only
+  prohibited_automation:
+    - Submit an application.
+    - Send email or LinkedIn messages.
+    - Send connection requests.
+    - Click Apply, Submit, Send, or Connect.
+  rule: Prepare recommendations and drafts only; the candidate performs every final action manually.
+
+# How much weight a bullet carries, based on how well it is evidenced.
+evidence_status_strength:
+  verified: 1.0
+  verified_from_local_repository: 1.0
+  verified_from_git_history: 1.0
+  user_confirmed: 0.9
+  resolved_for_candidate: 0.7
+  user_provided_cv: 0.6
+  excluded_until_confirmed: 0.0
+
+# A skill may only be claimed if it maps to at least one evidenced bullet.
+evidence_linked_skills:
+  Python: [experience.exp_data_platform.bullet_1, projects.prj_agent_assistant.bullet_1]
+  FastAPI: [projects.prj_agent_assistant.bullet_1]
+  LangGraph: [projects.prj_agent_assistant.bullet_1]
+  SQL: [experience.exp_data_platform.bullet_1]
+  pytest: [experience.exp_data_platform.bullet_2]
+  GitHub Actions: [experience.exp_data_platform.bullet_2]
+  Apache Kafka: [projects.prj_stream_pipeline.bullet_1]
+  Docker: [projects.prj_stream_pipeline.bullet_1]
+  data pipelines: [projects.prj_stream_pipeline.bullet_1, experience.exp_data_platform.bullet_1]
+  quality checks: [projects.prj_stream_pipeline.bullet_2]
+
+experience_project_evidence_map:
+  exp_data_platform:
+    themes: [data_engineering, testing]
+    strongest_bullet: experience.exp_data_platform.bullet_1
+  prj_stream_pipeline:
+    themes: [data_engineering, backend]
+    strongest_bullet: projects.prj_stream_pipeline.bullet_1
+  prj_agent_assistant:
+    themes: [llm_agents, retrieval, backend]
+    strongest_bullet: projects.prj_agent_assistant.bullet_1
+
+# Wording variants that are safe to use because they mean the same evidenced thing.
+safe_keyword_synonyms:
+  llm_agents: [LLM agent, agentic workflow, multi-step agent]
+  retrieval: [RAG, retrieval-augmented generation, semantic search]
+  data_engineering: [data pipeline, ETL, ingestion]
+
+# Target roles and what each one should emphasise.
+role_archetypes:
+  ai_engineer:
+    keywords: [LLM, agent, RAG, prompt, embedding]
+    prioritise_themes: [llm_agents, retrieval]
+    minimum_evidence_strength: 0.9
+  data_engineer:
+    keywords: [pipeline, warehouse, SQL, ETL, Airflow]
+    prioritise_themes: [data_engineering]
+    minimum_evidence_strength: 0.9
+  backend_engineer:
+    keywords: [API, FastAPI, service, microservice]
+    prioritise_themes: [backend]
+    minimum_evidence_strength: 0.9
+
+project_selection_rules:
+  max_projects: 3
+  rule: Prefer projects whose themes overlap the role archetype and whose bullets are confirmed.
+
+bullet_selection_rules:
+  max_bullets_per_role: 4
+  minimum_strength: 0.6
+  rule: Never reorder a bullet in a way that changes its factual meaning.
+
+factual_guardrails:
+  never_invent:
+    - Job titles, employment dates, or team sizes.
+    - Percentages, latencies, accuracy figures, or cost savings.
+    - Technologies that do not appear in an evidenced bullet.
+  on_conflict: Prefer evidence_register.yaml and drop the claim.
+  on_missing_evidence: Report the gap instead of filling it.
+
+known_gaps_global:
+  - No production Kubernetes ownership evidenced.
+  - No published benchmark numbers.
+  - No formal team-lead title.
+
+scoring_rubric:
+  keyword_overlap: 0.25
+  evidence_strength: 0.25
+  theme_alignment: 0.20
+  seniority_fit: 0.10
+  location_fit: 0.10
+  recency: 0.10
+  pass_threshold: 0.60

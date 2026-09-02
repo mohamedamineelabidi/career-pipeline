@@ -1,0 +1,53 @@
+version: 1
+candidate: Jordan Rivera
+purpose: Resolve factual conflicts before generating an approved CV.
+rule: >
+  Candidate-resolved fields may enter a review draft; only user-confirmed fields
+  may enter the final approved CV. This register is the guardrail that stops the
+  pipeline from publishing a claim the candidate cannot defend in an interview.
+
+# Facts the candidate has explicitly confirmed, with how and when they were checked.
+confirmed_relationships:
+  - statement: Insight Platform is a product of Northwind Analytics.
+    status: user_confirmed
+    confirmed_on: 2026-01-15
+  - statement: The candidate is a contributor to support-agent-assistant, not its sole author.
+    status: verified_from_git_history
+    verified_on: 2026-01-20
+    evidence:
+      - 24 non-merge commits authored by the candidate.
+      - Contributions span the API layer, retrieval index, tests and documentation.
+
+# Per-repository evidence: what can be claimed, and what must never be claimed.
+repository_evidence:
+  support_agent_assistant:
+    repository: https://github.com/your-github-handle/support-agent-assistant
+    status: verified_from_local_repository
+    verified_on: 2026-01-20
+    evidence_paths:
+      - api/main.py
+      - retrieval/index.py
+      - tests/test_retrieval.py
+    guardrails:
+      - Do not publish latency or accuracy metrics without a verified runtime artifact.
+      - The ranking step falls back to keyword search when no embedding model is available.
+
+# Claims that are blocked until the candidate provides proof.
+excluded_until_confirmed:
+  - statement: Reduced infrastructure cost by a specific percentage.
+    reason: No verifiable billing artifact was provided.
+  - statement: Led a team of engineers.
+    reason: Title and scope not confirmed by the employer.
+
+# Safety rules the application layer enforces.
+application_control:
+  final_approval_required: true
+  submission_mode: manual_only
+  prohibited_automation:
+    - Submit an application.
+    - Send email or LinkedIn messages.
+    - Send connection requests.
+    - Click Apply, Submit, Send, or Connect.
+  rule: >
+    Prepare recommendations and drafts only. The candidate reviews the final CV
+    and performs every final action manually.

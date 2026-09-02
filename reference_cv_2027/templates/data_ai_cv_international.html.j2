@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="document-status" content="candidate_pending_user_approval">
+<title>{{ profile.identity.name }} | International Data & AI Engineer CV Candidate</title>
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+:root{--teal:#075d62;--copper:#a76538;--ink:#1d2d34;--muted:#617078}
+html,body{width:210mm;margin:0;background:#fff}
+body{font-family:Calibri,"Segoe UI",Arial,sans-serif;color:var(--ink);font-size:10pt;line-height:1.38;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+a{color:inherit;text-decoration:none}
+.page{width:210mm;height:297mm;padding:12mm 15mm 11mm;overflow:hidden;background:#fff;break-after:page}
+.page:last-child{break-after:auto}
+header{text-align:center;padding-bottom:2.5mm;border-bottom:.55mm solid var(--teal)}
+.name{font-family:Bahnschrift,"Segoe UI",sans-serif;font-size:20pt;line-height:1.04;letter-spacing:.55px;font-weight:650;text-transform:uppercase;margin:0;color:#17343a}
+.title{font-family:Bahnschrift,"Segoe UI",sans-serif;font-size:11pt;color:var(--teal);margin-top:.8mm}
+.contact{margin-top:1.4mm;color:var(--muted);font-size:9pt}
+.contact-line{display:flex;justify-content:center;flex-wrap:wrap;gap:.4mm 3.5mm}
+.contact-links{margin-top:.4mm}
+.summary{text-align:center;padding:2.6mm 5mm 1.7mm;color:#34464c;font-size:9.7pt}
+h2{font-family:Bahnschrift,"Segoe UI",sans-serif;font-size:10.7pt;line-height:1;text-transform:uppercase;letter-spacing:.55px;color:var(--teal);margin:3mm 0 1.4mm;padding:0 0 .65mm;border-bottom:.45mm solid var(--teal);font-weight:700}
+.entry{margin-bottom:2.35mm;break-inside:avoid}
+.entry-head{display:flex;justify-content:space-between;gap:5mm;align-items:baseline;margin-bottom:.35mm}
+.role{font-family:Bahnschrift,"Segoe UI",sans-serif;font-size:10.2pt;font-weight:650;color:#17343a}
+.date{font-family:Bahnschrift,"Segoe UI",sans-serif;font-size:9.15pt;font-weight:650;color:var(--copper);white-space:nowrap;text-transform:uppercase}
+.orgline{display:flex;justify-content:space-between;gap:5mm;align-items:baseline;margin:.1mm 0 .45mm}
+.org{font-size:9.2pt;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.08px}
+.location{font-size:9pt;color:var(--muted);white-space:nowrap;font-style:italic}
+ul{margin:.25mm 0 0;padding-left:4.4mm}
+li{margin:.3mm 0;padding-left:.25mm;color:#303b42}
+.tech{font-size:9pt;color:#4f5d63;margin-top:.45mm;font-style:italic;line-height:1.22}
+.tech b{font-style:normal;color:var(--teal);font-weight:700}
+.edu-row,.meta-row{font-size:9.25pt;margin:.5mm 0;color:#34434a}
+.edu-row b,.meta-row b{font-family:Bahnschrift,"Segoe UI",sans-serif;color:#17343a}
+.page-two-header{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:2mm;border-bottom:.45mm solid var(--teal)}
+.page-two-header b{font-family:Bahnschrift,"Segoe UI",sans-serif;font-size:12pt;color:#17343a;letter-spacing:.25px}
+.page-two-header span{font-size:9pt;color:var(--muted)}
+.project{margin-bottom:3.2mm}
+.project .role{font-size:10.4pt}
+.cert-row{display:flex;justify-content:space-between;gap:5mm;font-size:9.3pt;margin:.65mm 0;color:#34434a}
+.cert-row b{color:#17343a}
+.cert-date{font-family:Bahnschrift,"Segoe UI",sans-serif;color:var(--copper);white-space:nowrap;font-weight:650}
+.note{font-size:8.8pt;color:var(--muted);margin-top:1mm}
+</style>
+</head>
+<body>
+<main>
+  <section class="page">
+    <header>
+      <h1 class="name">{{ profile.identity.name }}</h1>
+      <div class="title">{{ profile.data_ai_variant.headline }}</div>
+      <div class="contact">
+        <div class="contact-line">
+          <span>{{ profile.identity.location }}</span>
+          <a href="mailto:{{ profile.identity.email }}">{{ profile.identity.email }}</a>
+          <a href="tel:{{ profile.identity.phone | replace(' ', '') }}">{{ profile.identity.phone }}</a>
+        </div>
+        <div class="contact-line contact-links">
+          <a href="{{ profile.identity.linkedin_url }}">linkedin.com/in/{{ profile.identity.linkedin_handle }}</a>
+          <a href="{{ profile.identity.github_url }}">github.com/{{ profile.identity.github_handle }}</a>
+          <a href="{{ profile.identity.portfolio_url }}">Portfolio</a>
+          <a href="{{ profile.identity.credly_url }}">credly.com/users/mohamed-amine-el-abidi</a>
+        </div>
+      </div>
+    </header>
+
+    <div class="summary">{{ profile.data_ai_variant.summary }}{% if profile.tailoring is defined %}{{ profile.tailoring.availability_statement }}{% else %} Available for a PFE internship from <b>{{ profile.targets.pfe_available_from | format_date }}</b>.{% endif %}</div>
+
+    <h2>Professional Experience</h2>
+    {% for item in experience %}
+    <article class="entry">
+      <div class="entry-head"><div class="role">{{ item.title }}</div><div class="date">{{ item.start_date | date_range(item.end_date) }}</div></div>
+      <div class="orgline"><div class="org">{{ item.company }}{% if item.product %} · {{ item.product }}{% endif %}</div><div class="location">{{ item.location }}</div></div>
+      <ul>{% for bullet in item.bullets %}<li>{{ bullet.statement }}</li>{% endfor %}</ul>
+      <div class="tech"><b>Skills &amp; technologies:</b> {{ item.display_technologies | join(', ') }}</div>
+    </article>
+    {% endfor %}
+
+    <h2>Education</h2>
+    {% for item in profile.education %}<div class="edu-row"><b>{{ item.institution }}</b> · {{ item.degree }}, {{ item.field }} <span style="float:right">{{ item.start_date | format_date }} – {% if item.cv_end_date %}{{ item.cv_end_date }}{% else %}{{ item.end_date | format_date }}{% endif %}</span></div>{% endfor %}
+  </section>
+
+  <section class="page">
+    <div class="page-two-header"><b>{{ profile.identity.name }}</b><span>International Data &amp; AI Engineer CV · Page 2</span></div>
+
+    <h2>Selected Projects</h2>
+    {% for item in projects %}
+    <article class="entry project">
+      <div class="entry-head"><div class="role">{% if item.github_url %}<a href="{{ item.github_url }}" aria-label="View {{ item.name }} on GitHub">{{ item.name }}</a>{% else %}{{ item.name }}{% endif %} · {{ item.role }}</div>{% if item.start_date %}<div class="date">{{ item.start_date | date_range(item.end_date) }}</div>{% endif %}</div>
+      <ul>{% for bullet in item.bullets %}<li>{{ bullet.statement }}</li>{% endfor %}</ul>
+      <div class="tech"><b>Technologies:</b> {{ item.display_technologies | join(', ') }}</div>
+    </article>
+    {% endfor %}
+
+    <h2>Certifications</h2>
+    {% for item in profile.certifications %}<div class="cert-row"><span><b>{{ item.name }}</b> · {{ item.issuer }}</span><span class="cert-date">{% if item.valid_until %}Valid until {{ item.valid_until | format_date }}{% else %}{{ item.issued_year }}{% endif %}</span></div>{% endfor %}
+    <div class="note">Credential profile: <a href="{{ profile.identity.credly_url }}">credly.com/users/mohamed-amine-el-abidi</a></div>
+
+    <h2>Additional Training &amp; Leadership</h2>
+    {% for item in profile.training %}<div class="meta-row"><b>{{ item.title }}, {{ item.institution }}</b> · {{ item.start_date | date_range(item.end_date) }}<br>{{ item.description }}</div>{% endfor %}
+    {% for item in profile.leadership %}<div class="meta-row"><b>{{ item.title }}, {{ item.organization }}</b> · {{ item.statement }}</div>{% endfor %}
+  </section>
+</main>
+</body>
+</html>

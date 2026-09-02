@@ -1,0 +1,157 @@
+version: 1
+source_policy: >
+  Canonical career facts used to generate tailored CVs. Every statement must be
+  verifiable. The pipeline never invents titles, metrics, or technologies: a bullet
+  whose evidence_status is not "confirmed" is excluded from an approved CV.
+  Copy this file to career_master.yaml and replace it with your own facts.
+
+identity:
+  name: Jordan Rivera
+  location: Lisbon, Portugal
+  email: you@example.com
+  phone: "+351 912345678"
+  linkedin_handle: your-linkedin-handle
+  linkedin_url: https://www.linkedin.com/in/your-linkedin-handle
+  github_handle: your-github-handle
+  github_url: https://github.com/your-github-handle
+  portfolio_url: https://example.com/portfolio
+  photo_path: ""
+  credly_url: ""
+
+targets:
+  primary_identity: Data & AI Engineer
+  headline: Data & AI Engineer | LLM agents, data platforms, cloud delivery
+  pfe_available_from: "2027-01"
+  graduation: "2027-06"
+  preferred_locations:
+    - Portugal
+    - France
+    - Remote
+
+summary_evidence:
+  - Builds retrieval and agent systems on Python, FastAPI and LangGraph.
+  - Ships data pipelines and dashboards used by internal analytics teams.
+  - Comfortable across cloud deployment, CI/CD and containerized delivery.
+
+skills:
+  ai_and_agents:
+    - LangGraph
+    - LangChain
+    - Retrieval-augmented generation
+    - Prompt evaluation
+  data_and_ml:
+    - Python
+    - pandas
+    - scikit-learn
+    - SQL
+  vision:
+    - OpenCV
+    - ONNX Runtime
+  full_stack_and_automation:
+    - FastAPI
+    - React
+    - TypeScript
+    - n8n
+  cloud_and_delivery:
+    - Docker
+    - GitHub Actions
+    - Azure Container Apps
+
+experience:
+  - id: exp_data_platform
+    company: Northwind Analytics
+    product: Insight Platform
+    title: Data Engineering Intern
+    location: Lisbon, Portugal
+    start_date: "2026-02"
+    end_date: "2026-08"
+    status: verified
+    selected_for_reference: true
+    selected_for_data_ai: true
+    bullets:
+      - statement: Built ingestion jobs that consolidate vendor exports into a single warehouse schema.
+        evidence_status: user_confirmed
+        metrics: []
+        role_tags: [data_engineer, backend]
+        technologies: [Python, SQL, Airflow]
+      - statement: Added regression tests and CI checks to the transformation layer.
+        evidence_status: user_confirmed
+        metrics: []
+        role_tags: [data_engineer, devops]
+        technologies: [pytest, GitHub Actions]
+
+projects:
+  - id: prj_agent_assistant
+    name: Support Agent Assistant
+    github_url: https://github.com/your-github-handle/support-agent-assistant
+    role: Author
+    start_date: 2026
+    end_date: 2026
+    status: verified
+    selected_for_reference: true
+    selected_for_data_ai: true
+    bullets:
+      - statement: Implemented a retrieval agent that answers product questions from indexed documentation.
+        evidence_status: user_confirmed
+        metrics: []
+        role_tags: [ai_engineer]
+        technologies: [Python, FastAPI, LangGraph, FAISS]
+
+  - id: prj_stream_pipeline
+    name: Streaming Data Pipeline
+    github_url: https://github.com/your-github-handle/streaming-data-pipeline
+    role: Author
+    start_date: 2025
+    end_date: 2026
+    status: verified
+    selected_for_reference: true
+    selected_for_data_ai: true
+    bullets:
+      - statement: Built ingestion and transformation data pipelines on Apache Kafka, containerised with Docker.
+        evidence_status: user_confirmed
+        metrics: []
+        role_tags: [data_engineer, backend]
+        technologies: [Python, Apache Kafka, Docker, SQL]
+      - statement: Added automated quality checks that validate each batch before it lands in the warehouse.
+        evidence_status: user_confirmed
+        metrics: []
+        role_tags: [data_engineer]
+        technologies: [Python, pytest]
+
+education:
+  - institution: Example Institute of Technology
+    degree: Engineering Degree
+    field: Data and Artificial Intelligence
+    location: Lisbon, Portugal
+    start_date: "2024-09"
+    end_date: "2027-06"
+    cv_end_date: 2027
+    status: in_progress
+
+training:
+  - institution: Example Academy
+    title: Applied Machine Learning
+    start_date: "2025-01"
+    end_date: "2025-04"
+    status: verified
+    selected_for_reference: true
+    description: Supervised learning, model evaluation and deployment basics.
+
+leadership:
+  - organization: University AI Club
+    title: Workshop Lead
+    status: confirmed
+    statement: Ran hands-on sessions on practical LLM application design.
+    metrics: []
+
+certifications:
+  - name: Example Cloud Fundamentals
+    issuer: Example Cloud
+    issued: "2025-11"
+    url: ""
+
+languages:
+  - language: English
+    level: Professional
+  - language: Portuguese
+    level: Native
