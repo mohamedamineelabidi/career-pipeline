@@ -1,0 +1,29 @@
+[project]
+name = "career-pipeline-v2"
+version = "0.1.0"
+description = "Local evidence-backed career opportunity, CV and outreach pipeline"
+requires-python = ">=3.11"
+dependencies = [
+  "Jinja2>=3.1,<4",
+  "PyYAML>=6,<7",
+  "feedparser>=6.0.14",
+  "playwright>=1.62.0",
+  "pypdf>=6,<7",
+  "pypdfium2>=4,<6",
+  "python-jobspy>=1.1.82",
+  "rapidfuzz>=3.14.6",
+  "rendercv[full]>=2.3,<2.4",
+  "scikit-learn>=1.9.0",
+  "sentence-transformers>=6.0.1",
+  "typst>=0.13,<0.14",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8,<9",
+  "playwright>=1.55,<2",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
