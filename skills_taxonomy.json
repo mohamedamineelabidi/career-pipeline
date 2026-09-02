@@ -1,0 +1,1704 @@
+{
+  "version": 1,
+  "description": "Canonical Data/AI/ML/GenAI/cloud/software skill taxonomy used by semantic_match.py. Aliases are matched case-insensitively on word boundaries. Candidate 'have' skills are only ever derived from career_master.yaml / evidence_register.yaml, never from this file.",
+  "skills": [
+    {
+      "name": "Python",
+      "category": "language",
+      "aliases": [
+        "python",
+        "python3",
+        "python 3"
+      ]
+    },
+    {
+      "name": "SQL",
+      "category": "language",
+      "aliases": [
+        "sql",
+        "t-sql",
+        "pl/sql",
+        "ansi sql",
+        "structured query language",
+        "requêtes sql"
+      ]
+    },
+    {
+      "name": "Java",
+      "category": "language",
+      "aliases": [
+        "java"
+      ]
+    },
+    {
+      "name": "Scala",
+      "category": "language",
+      "aliases": [
+        "scala"
+      ]
+    },
+    {
+      "name": "R",
+      "category": "language",
+      "aliases": [
+        "r language",
+        "r programming",
+        "rstudio",
+        "python/r"
+      ]
+    },
+    {
+      "name": "Go",
+      "category": "language",
+      "aliases": [
+        "golang"
+      ]
+    },
+    {
+      "name": "Rust",
+      "category": "language",
+      "aliases": [
+        "rust"
+      ]
+    },
+    {
+      "name": "C++",
+      "category": "language",
+      "aliases": [
+        "c++",
+        "cpp"
+      ]
+    },
+    {
+      "name": "C#",
+      "category": "language",
+      "aliases": [
+        "c#",
+        ".net",
+        "dotnet"
+      ]
+    },
+    {
+      "name": "TypeScript",
+      "category": "language",
+      "aliases": [
+        "typescript",
+        "type script"
+      ]
+    },
+    {
+      "name": "JavaScript",
+      "category": "language",
+      "aliases": [
+        "javascript",
+        "js",
+        "es6",
+        "ecmascript",
+        "java script",
+        "vanilla js"
+      ]
+    },
+    {
+      "name": "Bash",
+      "category": "language",
+      "aliases": [
+        "bash",
+        "shell scripting",
+        "zsh"
+      ]
+    },
+    {
+      "name": "PyTorch",
+      "category": "ml",
+      "aliases": [
+        "pytorch",
+        "torch",
+        "pytorch lightning",
+        "py-torch"
+      ]
+    },
+    {
+      "name": "TensorFlow",
+      "category": "ml",
+      "aliases": [
+        "tensorflow",
+        "keras",
+        "tensor flow"
+      ]
+    },
+    {
+      "name": "scikit-learn",
+      "category": "ml",
+      "aliases": [
+        "scikit-learn",
+        "scikit learn",
+        "sklearn",
+        "sci-kit learn"
+      ]
+    },
+    {
+      "name": "XGBoost",
+      "category": "ml",
+      "aliases": [
+        "xgboost",
+        "gradient boosting",
+        "gbt",
+        "lightgbm",
+        "catboost"
+      ]
+    },
+    {
+      "name": "Pandas",
+      "category": "data",
+      "aliases": [
+        "pandas"
+      ]
+    },
+    {
+      "name": "NumPy",
+      "category": "data",
+      "aliases": [
+        "numpy"
+      ]
+    },
+    {
+      "name": "Polars",
+      "category": "data",
+      "aliases": [
+        "polars"
+      ]
+    },
+    {
+      "name": "Machine Learning",
+      "category": "ml",
+      "aliases": [
+        "machine learning",
+        "ml",
+        "apprentissage automatique",
+        "ml models",
+        "predictive modeling",
+        "predictive models",
+        "apprentissage machine",
+        "machine-learning"
+      ]
+    },
+    {
+      "name": "Deep Learning",
+      "category": "ml",
+      "aliases": [
+        "deep learning",
+        "neural networks",
+        "neural network",
+        "apprentissage profond",
+        "deep-learning",
+        "réseaux de neurones"
+      ]
+    },
+    {
+      "name": "NLP",
+      "category": "ml",
+      "aliases": [
+        "nlp",
+        "natural language processing",
+        "text mining",
+        "traitement du langage naturel",
+        "natural-language processing",
+        "traitement automatique du langage"
+      ]
+    },
+    {
+      "name": "Computer Vision",
+      "category": "ml",
+      "aliases": [
+        "computer vision",
+        "vision ai",
+        "image recognition",
+        "object detection",
+        "image analysis",
+        "vision par ordinateur"
+      ]
+    },
+    {
+      "name": "OpenCV",
+      "category": "ml",
+      "aliases": [
+        "opencv",
+        "cv2"
+      ]
+    },
+    {
+      "name": "ONNX",
+      "category": "ml",
+      "aliases": [
+        "onnx",
+        "onnx runtime",
+        "onnxruntime"
+      ]
+    },
+    {
+      "name": "Transformers",
+      "category": "genai",
+      "aliases": [
+        "transformers",
+        "hugging face",
+        "huggingface",
+        "bert",
+        "transformer models",
+        "hf transformers",
+        "transformer architecture"
+      ]
+    },
+    {
+      "name": "Time Series",
+      "category": "ml",
+      "aliases": [
+        "time series",
+        "time-series",
+        "forecasting",
+        "demand forecasting"
+      ]
+    },
+    {
+      "name": "Recommender Systems",
+      "category": "ml",
+      "aliases": [
+        "recommender systems",
+        "recommendation systems",
+        "recommendation engine",
+        "recsys"
+      ]
+    },
+    {
+      "name": "Reinforcement Learning",
+      "category": "ml",
+      "aliases": [
+        "reinforcement learning"
+      ]
+    },
+    {
+      "name": "Statistics",
+      "category": "ml",
+      "aliases": [
+        "statistics",
+        "statistical analysis",
+        "statistical modeling",
+        "statistiques",
+        "a/b testing",
+        "hypothesis testing"
+      ]
+    },
+    {
+      "name": "Feature Engineering",
+      "category": "ml",
+      "aliases": [
+        "feature engineering",
+        "feature store",
+        "feast"
+      ]
+    },
+    {
+      "name": "LLMs",
+      "category": "genai",
+      "aliases": [
+        "llm",
+        "llms",
+        "large language model",
+        "large language models",
+        "gpt",
+        "gpt-4",
+        "foundation models",
+        "large-language models",
+        "llm applications",
+        "llm-based",
+        "modèles de langage",
+        "grands modèles de langage"
+      ]
+    },
+    {
+      "name": "Generative AI",
+      "category": "genai",
+      "aliases": [
+        "generative ai",
+        "genai",
+        "gen ai",
+        "gen-ai",
+        "ia générative",
+        "ia generative",
+        "generative artificial intelligence",
+        "genai applications",
+        "gen-ai applications"
+      ]
+    },
+    {
+      "name": "RAG",
+      "category": "genai",
+      "aliases": [
+        "rag",
+        "retrieval augmented generation",
+        "retrieval-augmented generation",
+        "retrieval augmented",
+        "retrieval-augmented",
+        "rag pipelines",
+        "retrieval augmented generation (rag)"
+      ]
+    },
+    {
+      "name": "LangChain",
+      "category": "genai",
+      "aliases": [
+        "langchain",
+        "lang chain",
+        "langchain framework"
+      ]
+    },
+    {
+      "name": "LangGraph",
+      "category": "genai",
+      "aliases": [
+        "langgraph",
+        "lang graph"
+      ]
+    },
+    {
+      "name": "LlamaIndex",
+      "category": "genai",
+      "aliases": [
+        "llamaindex",
+        "llama index",
+        "llama-index"
+      ]
+    },
+    {
+      "name": "AI Agents",
+      "category": "genai",
+      "aliases": [
+        "ai agents",
+        "agentic",
+        "agentic ai",
+        "multi-agent",
+        "multi agent",
+        "multi-agent systems",
+        "autonomous agents",
+        "agent workflows",
+        "llm agents",
+        "agents ia",
+        "agentic workflows",
+        "agent frameworks"
+      ]
+    },
+    {
+      "name": "Prompt Engineering",
+      "category": "genai",
+      "aliases": [
+        "prompt engineering",
+        "prompting",
+        "prompt design",
+        "prompt-engineering",
+        "ingénierie de prompts"
+      ]
+    },
+    {
+      "name": "Fine-tuning",
+      "category": "genai",
+      "aliases": [
+        "fine-tuning",
+        "fine tuning",
+        "finetuning",
+        "lora",
+        "peft",
+        "instruction tuning",
+        "fine-tuned",
+        "finetuned",
+        "qlora"
+      ]
+    },
+    {
+      "name": "LLM Evaluation",
+      "category": "genai",
+      "aliases": [
+        "llm evaluation",
+        "llm evals",
+        "evals",
+        "model evaluation",
+        "ragas",
+        "evaluation frameworks",
+        "llm-as-a-judge"
+      ]
+    },
+    {
+      "name": "Embeddings",
+      "category": "genai",
+      "aliases": [
+        "embeddings",
+        "embedding models",
+        "sentence embeddings",
+        "vector embeddings",
+        "semantic search",
+        "text embeddings"
+      ]
+    },
+    {
+      "name": "Vector Database",
+      "category": "genai",
+      "aliases": [
+        "vector db",
+        "vector database",
+        "vector databases",
+        "vector store",
+        "vector search",
+        "vector stores",
+        "bases de données vectorielles",
+        "base de données vectorielle"
+      ]
+    },
+    {
+      "name": "Qdrant",
+      "category": "genai",
+      "aliases": [
+        "qdrant"
+      ]
+    },
+    {
+      "name": "Pinecone",
+      "category": "genai",
+      "aliases": [
+        "pinecone"
+      ]
+    },
+    {
+      "name": "Weaviate",
+      "category": "genai",
+      "aliases": [
+        "weaviate"
+      ]
+    },
+    {
+      "name": "Chroma",
+      "category": "genai",
+      "aliases": [
+        "chroma",
+        "chromadb"
+      ]
+    },
+    {
+      "name": "pgvector",
+      "category": "genai",
+      "aliases": [
+        "pgvector"
+      ]
+    },
+    {
+      "name": "FAISS",
+      "category": "genai",
+      "aliases": [
+        "faiss"
+      ]
+    },
+    {
+      "name": "Milvus",
+      "category": "genai",
+      "aliases": [
+        "milvus"
+      ]
+    },
+    {
+      "name": "Elasticsearch",
+      "category": "data",
+      "aliases": [
+        "elasticsearch",
+        "elastic search",
+        "opensearch",
+        "elk"
+      ]
+    },
+    {
+      "name": "OpenAI API",
+      "category": "genai",
+      "aliases": [
+        "openai",
+        "openai api",
+        "chatgpt",
+        "openai models",
+        "gpt-4o",
+        "gpt-5"
+      ]
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "genai",
+      "aliases": [
+        "azure openai",
+        "azure ai"
+      ]
+    },
+    {
+      "name": "Anthropic Claude",
+      "category": "genai",
+      "aliases": [
+        "anthropic",
+        "claude",
+        "claude api"
+      ]
+    },
+    {
+      "name": "Gemini",
+      "category": "genai",
+      "aliases": [
+        "gemini",
+        "google gemini",
+        "gemini api"
+      ]
+    },
+    {
+      "name": "Vertex AI",
+      "category": "genai",
+      "aliases": [
+        "vertex ai",
+        "vertexai"
+      ]
+    },
+    {
+      "name": "Amazon Bedrock",
+      "category": "genai",
+      "aliases": [
+        "bedrock",
+        "amazon bedrock",
+        "aws bedrock"
+      ]
+    },
+    {
+      "name": "AWS SageMaker",
+      "category": "mlops",
+      "aliases": [
+        "sagemaker",
+        "aws sagemaker"
+      ]
+    },
+    {
+      "name": "Azure ML",
+      "category": "mlops",
+      "aliases": [
+        "azure ml",
+        "azure machine learning",
+        "azureml"
+      ]
+    },
+    {
+      "name": "LiteLLM",
+      "category": "genai",
+      "aliases": [
+        "litellm"
+      ]
+    },
+    {
+      "name": "Ollama",
+      "category": "genai",
+      "aliases": [
+        "ollama",
+        "llama.cpp",
+        "vllm",
+        "local llm",
+        "local llms"
+      ]
+    },
+    {
+      "name": "MCP",
+      "category": "genai",
+      "aliases": [
+        "mcp",
+        "model context protocol"
+      ]
+    },
+    {
+      "name": "Voice AI",
+      "category": "genai",
+      "aliases": [
+        "voice ai",
+        "speech to text",
+        "speech-to-text",
+        "text to speech",
+        "text-to-speech",
+        "whisper",
+        "asr",
+        "tts"
+      ]
+    },
+    {
+      "name": "MLOps",
+      "category": "mlops",
+      "aliases": [
+        "mlops",
+        "ml ops",
+        "ml operations",
+        "model deployment",
+        "model serving",
+        "model monitoring",
+        "ml-ops",
+        "machine learning operations",
+        "mlops pipelines"
+      ]
+    },
+    {
+      "name": "MLflow",
+      "category": "mlops",
+      "aliases": [
+        "mlflow"
+      ]
+    },
+    {
+      "name": "Weights & Biases",
+      "category": "mlops",
+      "aliases": [
+        "weights & biases",
+        "weights and biases",
+        "wandb",
+        "w&b"
+      ]
+    },
+    {
+      "name": "Kubeflow",
+      "category": "mlops",
+      "aliases": [
+        "kubeflow"
+      ]
+    },
+    {
+      "name": "DVC",
+      "category": "mlops",
+      "aliases": [
+        "dvc",
+        "data version control"
+      ]
+    },
+    {
+      "name": "LLMOps",
+      "category": "mlops",
+      "aliases": [
+        "llmops",
+        "langsmith",
+        "langfuse",
+        "observability for llm"
+      ]
+    },
+    {
+      "name": "Spark",
+      "category": "data",
+      "aliases": [
+        "spark",
+        "apache spark",
+        "pyspark",
+        "spark sql",
+        "spark mllib",
+        "apache-spark",
+        "spark streaming"
+      ]
+    },
+    {
+      "name": "Hadoop",
+      "category": "data",
+      "aliases": [
+        "hadoop",
+        "hdfs",
+        "mapreduce",
+        "hive"
+      ]
+    },
+    {
+      "name": "Kafka",
+      "category": "data",
+      "aliases": [
+        "kafka",
+        "apache kafka",
+        "confluent"
+      ]
+    },
+    {
+      "name": "Flink",
+      "category": "data",
+      "aliases": [
+        "flink",
+        "apache flink",
+        "pyflink"
+      ]
+    },
+    {
+      "name": "Airflow",
+      "category": "data",
+      "aliases": [
+        "airflow",
+        "apache airflow",
+        "apache-airflow"
+      ]
+    },
+    {
+      "name": "dbt",
+      "category": "data",
+      "aliases": [
+        "dbt",
+        "data build tool"
+      ]
+    },
+    {
+      "name": "Dagster",
+      "category": "data",
+      "aliases": [
+        "dagster"
+      ]
+    },
+    {
+      "name": "Prefect",
+      "category": "data",
+      "aliases": [
+        "prefect"
+      ]
+    },
+    {
+      "name": "ETL",
+      "category": "data",
+      "aliases": [
+        "etl",
+        "elt",
+        "data pipelines",
+        "data pipeline",
+        "pipelines de données",
+        "data ingestion",
+        "etl/elt",
+        "etl pipelines",
+        "etl pipeline",
+        "extract transform load"
+      ]
+    },
+    {
+      "name": "Data Engineering",
+      "category": "data",
+      "aliases": [
+        "data engineering",
+        "data engineer",
+        "ingénieur data",
+        "ingenieur data",
+        "ingénierie des données",
+        "data eng"
+      ]
+    },
+    {
+      "name": "Data Warehouse",
+      "category": "data",
+      "aliases": [
+        "data warehouse",
+        "data warehousing",
+        "dwh",
+        "entrepôt de données",
+        "star schema",
+        "dimensional modeling",
+        "datawarehouse",
+        "data-warehouse"
+      ]
+    },
+    {
+      "name": "Data Lake",
+      "category": "data",
+      "aliases": [
+        "data lake",
+        "lakehouse",
+        "data lakehouse",
+        "delta lake",
+        "iceberg",
+        "apache iceberg",
+        "hudi"
+      ]
+    },
+    {
+      "name": "Data Modeling",
+      "category": "data",
+      "aliases": [
+        "data modeling",
+        "data modelling",
+        "modélisation de données",
+        "schema design"
+      ]
+    },
+    {
+      "name": "Data Quality",
+      "category": "data",
+      "aliases": [
+        "data quality",
+        "great expectations",
+        "data validation",
+        "data observability",
+        "soda"
+      ]
+    },
+    {
+      "name": "Data Governance",
+      "category": "data",
+      "aliases": [
+        "data governance",
+        "data catalog",
+        "data lineage",
+        "gdpr",
+        "rgpd",
+        "data privacy"
+      ]
+    },
+    {
+      "name": "Streaming",
+      "category": "data",
+      "aliases": [
+        "streaming",
+        "real-time data",
+        "real time data",
+        "stream processing",
+        "event streaming",
+        "event-driven"
+      ]
+    },
+    {
+      "name": "Databricks",
+      "category": "data",
+      "aliases": [
+        "databricks"
+      ]
+    },
+    {
+      "name": "Snowflake",
+      "category": "data",
+      "aliases": [
+        "snowflake"
+      ]
+    },
+    {
+      "name": "BigQuery",
+      "category": "data",
+      "aliases": [
+        "bigquery",
+        "big query"
+      ]
+    },
+    {
+      "name": "Redshift",
+      "category": "data",
+      "aliases": [
+        "redshift",
+        "amazon redshift"
+      ]
+    },
+    {
+      "name": "Synapse",
+      "category": "data",
+      "aliases": [
+        "synapse",
+        "azure synapse"
+      ]
+    },
+    {
+      "name": "Microsoft Fabric",
+      "category": "data",
+      "aliases": [
+        "microsoft fabric"
+      ]
+    },
+    {
+      "name": "Azure Data Factory",
+      "category": "data",
+      "aliases": [
+        "data factory",
+        "azure data factory",
+        "adf"
+      ]
+    },
+    {
+      "name": "Talend",
+      "category": "data",
+      "aliases": [
+        "talend"
+      ]
+    },
+    {
+      "name": "Informatica",
+      "category": "data",
+      "aliases": [
+        "informatica"
+      ]
+    },
+    {
+      "name": "SSIS",
+      "category": "data",
+      "aliases": [
+        "ssis",
+        "sql server integration services"
+      ]
+    },
+    {
+      "name": "DuckDB",
+      "category": "data",
+      "aliases": [
+        "duckdb"
+      ]
+    },
+    {
+      "name": "Trino",
+      "category": "data",
+      "aliases": [
+        "trino",
+        "presto"
+      ]
+    },
+    {
+      "name": "PostgreSQL",
+      "category": "database",
+      "aliases": [
+        "postgresql",
+        "postgres",
+        "psql",
+        "postgre sql",
+        "postgresql database"
+      ]
+    },
+    {
+      "name": "PostGIS",
+      "category": "database",
+      "aliases": [
+        "postgis",
+        "geospatial",
+        "gis"
+      ]
+    },
+    {
+      "name": "MySQL",
+      "category": "database",
+      "aliases": [
+        "mysql",
+        "mariadb"
+      ]
+    },
+    {
+      "name": "SQL Server",
+      "category": "database",
+      "aliases": [
+        "sql server",
+        "mssql",
+        "microsoft sql server"
+      ]
+    },
+    {
+      "name": "Oracle",
+      "category": "database",
+      "aliases": [
+        "oracle",
+        "oracle db",
+        "oracle database"
+      ]
+    },
+    {
+      "name": "MongoDB",
+      "category": "database",
+      "aliases": [
+        "mongodb",
+        "mongo",
+        "mongo db"
+      ]
+    },
+    {
+      "name": "Cassandra",
+      "category": "database",
+      "aliases": [
+        "cassandra",
+        "apache cassandra"
+      ]
+    },
+    {
+      "name": "Redis",
+      "category": "database",
+      "aliases": [
+        "redis",
+        "redis cache"
+      ]
+    },
+    {
+      "name": "Neo4j",
+      "category": "database",
+      "aliases": [
+        "neo4j",
+        "graph database",
+        "graph databases",
+        "knowledge graph",
+        "knowledge graphs"
+      ]
+    },
+    {
+      "name": "NoSQL",
+      "category": "database",
+      "aliases": [
+        "nosql",
+        "dynamodb",
+        "cosmos db",
+        "cosmosdb"
+      ]
+    },
+    {
+      "name": "MinIO",
+      "category": "database",
+      "aliases": [
+        "minio",
+        "object storage",
+        "s3-compatible"
+      ]
+    },
+    {
+      "name": "Docker",
+      "category": "devops",
+      "aliases": [
+        "docker",
+        "containers",
+        "containerization",
+        "docker compose",
+        "dockerized",
+        "dockerised",
+        "dockerfile",
+        "conteneurisation",
+        "conteneurs"
+      ]
+    },
+    {
+      "name": "Kubernetes",
+      "category": "devops",
+      "aliases": [
+        "kubernetes",
+        "k8s",
+        "helm",
+        "aks",
+        "eks",
+        "gke",
+        "kubernetes cluster"
+      ]
+    },
+    {
+      "name": "CI/CD",
+      "category": "devops",
+      "aliases": [
+        "ci/cd",
+        "ci cd",
+        "cicd",
+        "continuous integration",
+        "continuous delivery",
+        "continuous deployment",
+        "ci-cd",
+        "ci / cd",
+        "continuous integration/continuous delivery",
+        "continuous integration and delivery",
+        "pipelines ci/cd"
+      ]
+    },
+    {
+      "name": "GitHub Actions",
+      "category": "devops",
+      "aliases": [
+        "github actions"
+      ]
+    },
+    {
+      "name": "GitLab CI",
+      "category": "devops",
+      "aliases": [
+        "gitlab ci",
+        "gitlab"
+      ]
+    },
+    {
+      "name": "Jenkins",
+      "category": "devops",
+      "aliases": [
+        "jenkins"
+      ]
+    },
+    {
+      "name": "Git",
+      "category": "devops",
+      "aliases": [
+        "git",
+        "github",
+        "version control",
+        "gitflow",
+        "git flow"
+      ]
+    },
+    {
+      "name": "Terraform",
+      "category": "devops",
+      "aliases": [
+        "terraform",
+        "infrastructure as code",
+        "iac",
+        "opentofu",
+        "terraform modules"
+      ]
+    },
+    {
+      "name": "Ansible",
+      "category": "devops",
+      "aliases": [
+        "ansible"
+      ]
+    },
+    {
+      "name": "Linux",
+      "category": "devops",
+      "aliases": [
+        "linux",
+        "unix",
+        "ubuntu",
+        "debian",
+        "gnu/linux"
+      ]
+    },
+    {
+      "name": "Monitoring",
+      "category": "devops",
+      "aliases": [
+        "prometheus",
+        "grafana",
+        "datadog",
+        "logging and monitoring"
+      ]
+    },
+    {
+      "name": "AWS",
+      "category": "cloud",
+      "aliases": [
+        "aws",
+        "amazon web services",
+        "ec2",
+        "aws lambda",
+        "amazon aws",
+        "aws cloud",
+        "aws services"
+      ]
+    },
+    {
+      "name": "Azure",
+      "category": "cloud",
+      "aliases": [
+        "azure",
+        "microsoft azure",
+        "azure cloud",
+        "ms azure",
+        "azure services"
+      ]
+    },
+    {
+      "name": "GCP",
+      "category": "cloud",
+      "aliases": [
+        "gcp",
+        "google cloud",
+        "google cloud platform",
+        "google cloud platform (gcp)",
+        "gcp cloud",
+        "google cloud services"
+      ]
+    },
+    {
+      "name": "Cloud Computing",
+      "category": "cloud",
+      "aliases": [
+        "cloud computing",
+        "cloud platforms",
+        "cloud infrastructure",
+        "cloud-native",
+        "cloud native"
+      ]
+    },
+    {
+      "name": "Serverless",
+      "category": "cloud",
+      "aliases": [
+        "serverless",
+        "cloud functions",
+        "azure functions",
+        "cloud run"
+      ]
+    },
+    {
+      "name": "Microservices",
+      "category": "software",
+      "aliases": [
+        "microservices",
+        "micro-services",
+        "service oriented",
+        "soa",
+        "microservice",
+        "micro services",
+        "architecture microservices"
+      ]
+    },
+    {
+      "name": "REST APIs",
+      "category": "software",
+      "aliases": [
+        "rest",
+        "rest api",
+        "rest apis",
+        "restful",
+        "api design",
+        "web services",
+        "openapi",
+        "swagger",
+        "api rest",
+        "apis rest",
+        "restful apis",
+        "restful api"
+      ]
+    },
+    {
+      "name": "GraphQL",
+      "category": "software",
+      "aliases": [
+        "graphql"
+      ]
+    },
+    {
+      "name": "gRPC",
+      "category": "software",
+      "aliases": [
+        "grpc",
+        "protobuf"
+      ]
+    },
+    {
+      "name": "FastAPI",
+      "category": "software",
+      "aliases": [
+        "fastapi",
+        "fast api",
+        "fast-api"
+      ]
+    },
+    {
+      "name": "Flask",
+      "category": "software",
+      "aliases": [
+        "flask"
+      ]
+    },
+    {
+      "name": "Django",
+      "category": "software",
+      "aliases": [
+        "django"
+      ]
+    },
+    {
+      "name": "Spring Boot",
+      "category": "software",
+      "aliases": [
+        "spring boot",
+        "springboot"
+      ]
+    },
+    {
+      "name": "Node.js",
+      "category": "software",
+      "aliases": [
+        "node.js",
+        "nodejs",
+        "node js",
+        "express.js",
+        "expressjs",
+        "nestjs"
+      ]
+    },
+    {
+      "name": "React",
+      "category": "software",
+      "aliases": [
+        "react",
+        "reactjs",
+        "react.js",
+        "next.js",
+        "nextjs"
+      ]
+    },
+    {
+      "name": "Angular",
+      "category": "software",
+      "aliases": [
+        "angular",
+        "angularjs"
+      ]
+    },
+    {
+      "name": "Vue.js",
+      "category": "software",
+      "aliases": [
+        "vue",
+        "vue.js",
+        "vuejs",
+        "nuxt"
+      ]
+    },
+    {
+      "name": "HTML/CSS",
+      "category": "software",
+      "aliases": [
+        "html",
+        "css",
+        "html5",
+        "css3",
+        "tailwind",
+        "sass"
+      ]
+    },
+    {
+      "name": "Streamlit",
+      "category": "software",
+      "aliases": [
+        "streamlit",
+        "gradio",
+        "streamlit app"
+      ]
+    },
+    {
+      "name": "SQLAlchemy",
+      "category": "software",
+      "aliases": [
+        "sqlalchemy"
+      ]
+    },
+    {
+      "name": "Pydantic",
+      "category": "software",
+      "aliases": [
+        "pydantic"
+      ]
+    },
+    {
+      "name": "Firebase",
+      "category": "software",
+      "aliases": [
+        "firebase",
+        "firestore",
+        "supabase"
+      ]
+    },
+    {
+      "name": "n8n",
+      "category": "software",
+      "aliases": [
+        "n8n",
+        "zapier",
+        "make.com",
+        "workflow automation"
+      ]
+    },
+    {
+      "name": "Testing",
+      "category": "software",
+      "aliases": [
+        "unit testing",
+        "unit tests",
+        "pytest",
+        "integration testing",
+        "test automation",
+        "automated tests",
+        "tests unitaires",
+        "tdd",
+        "test-driven development"
+      ]
+    },
+    {
+      "name": "Software Architecture",
+      "category": "software",
+      "aliases": [
+        "software architecture",
+        "system design",
+        "design patterns",
+        "architecture logicielle",
+        "solution architecture",
+        "clean architecture"
+      ]
+    },
+    {
+      "name": "Agile",
+      "category": "software",
+      "aliases": [
+        "agile",
+        "scrum",
+        "kanban",
+        "jira",
+        "méthodes agiles",
+        "méthodologie agile"
+      ]
+    },
+    {
+      "name": "Power BI",
+      "category": "bi",
+      "aliases": [
+        "power bi",
+        "powerbi",
+        "dax",
+        "power query",
+        "power-bi",
+        "microsoft power bi"
+      ]
+    },
+    {
+      "name": "Tableau",
+      "category": "bi",
+      "aliases": [
+        "tableau"
+      ]
+    },
+    {
+      "name": "Looker",
+      "category": "bi",
+      "aliases": [
+        "looker",
+        "looker studio",
+        "data studio"
+      ]
+    },
+    {
+      "name": "Data Visualization",
+      "category": "bi",
+      "aliases": [
+        "data visualization",
+        "data visualisation",
+        "dashboards",
+        "dashboarding",
+        "matplotlib",
+        "seaborn",
+        "plotly"
+      ]
+    },
+    {
+      "name": "Excel",
+      "category": "bi",
+      "aliases": [
+        "microsoft excel",
+        "ms excel",
+        "vba",
+        "google sheets",
+        "excel avancé"
+      ]
+    },
+    {
+      "name": "SAP",
+      "category": "enterprise",
+      "aliases": [
+        "sap hana",
+        "sap bw",
+        "sap s/4hana",
+        "sap data"
+      ]
+    },
+    {
+      "name": "Salesforce",
+      "category": "enterprise",
+      "aliases": [
+        "salesforce"
+      ]
+    },
+    {
+      "name": "Dataiku",
+      "category": "enterprise",
+      "aliases": [
+        "dataiku"
+      ]
+    },
+    {
+      "name": "Alteryx",
+      "category": "enterprise",
+      "aliases": [
+        "alteryx"
+      ]
+    },
+    {
+      "name": "Palantir Foundry",
+      "category": "enterprise",
+      "aliases": [
+        "palantir"
+      ]
+    },
+    {
+      "name": "Blockchain",
+      "category": "other",
+      "aliases": [
+        "blockchain",
+        "ethereum",
+        "web3",
+        "solidity",
+        "smart contracts"
+      ]
+    },
+    {
+      "name": "IoT",
+      "category": "other",
+      "aliases": [
+        "iot",
+        "internet of things",
+        "edge computing",
+        "edge ai"
+      ]
+    },
+    {
+      "name": "Cybersecurity",
+      "category": "other",
+      "aliases": [
+        "cybersecurity",
+        "iam",
+        "oauth",
+        "zero trust",
+        "penetration testing"
+      ]
+    },
+    {
+      "name": "Networking",
+      "category": "other",
+      "aliases": [
+        "network engineering",
+        "tcp/ip",
+        "network protocols",
+        "5g",
+        "telecom networks"
+      ]
+    },
+    {
+      "name": "Robotics",
+      "category": "other",
+      "aliases": [
+        "robotics",
+        "ros",
+        "autonomous systems"
+      ]
+    },
+    {
+      "name": "Big Data",
+      "category": "data",
+      "aliases": [
+        "big data",
+        "large-scale data",
+        "distributed computing",
+        "distributed systems"
+      ]
+    },
+    {
+      "name": "Data Analysis",
+      "category": "data",
+      "aliases": [
+        "data analysis",
+        "data analytics",
+        "analytics",
+        "analyse de données",
+        "exploratory data analysis",
+        "eda"
+      ]
+    },
+    {
+      "name": "Data Science",
+      "category": "ml",
+      "aliases": [
+        "data science",
+        "data scientist",
+        "science des données",
+        "datascience"
+      ]
+    },
+    {
+      "name": "Mathematics",
+      "category": "ml",
+      "aliases": [
+        "linear algebra"
+      ]
+    },
+    {
+      "name": "Notebooks",
+      "category": "data",
+      "aliases": [
+        "jupyter",
+        "jupyter notebooks",
+        "notebooks",
+        "colab"
+      ]
+    },
+    {
+      "name": "Web Scraping",
+      "category": "data",
+      "aliases": [
+        "web scraping",
+        "scraping",
+        "scrapy",
+        "beautifulsoup",
+        "selenium",
+        "playwright",
+        "crawling"
+      ]
+    },
+    {
+      "name": "Technical Leadership",
+      "category": "soft",
+      "aliases": [
+        "team lead",
+        "technical leadership",
+        "tech lead",
+        "mentoring",
+        "code review",
+        "code reviews"
+      ]
+    },
+    {
+      "name": "Communication",
+      "category": "soft",
+      "aliases": [
+        "stakeholder management",
+        "presentation skills",
+        "client-facing",
+        "client facing",
+        "storytelling"
+      ]
+    },
+    {
+      "name": "English",
+      "category": "language_spoken",
+      "aliases": [
+        "english",
+        "anglais",
+        "fluent english"
+      ]
+    },
+    {
+      "name": "French",
+      "category": "language_spoken",
+      "aliases": [
+        "french",
+        "français",
+        "francais"
+      ]
+    },
+    {
+      "name": "Arabic",
+      "category": "language_spoken",
+      "aliases": [
+        "arabic",
+        "arabe"
+      ]
+    },
+    {
+      "name": "German",
+      "category": "language_spoken",
+      "aliases": [
+        "german",
+        "allemand",
+        "deutsch"
+      ]
+    },
+    {
+      "name": "Spanish",
+      "category": "language_spoken",
+      "aliases": [
+        "spanish",
+        "espagnol",
+        "español"
+      ]
+    }
+  ]
+}
