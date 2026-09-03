@@ -27,6 +27,10 @@ OUTCOME_TYPES = frozenset(
 )
 AUTOMATION_RUN_STATUSES = frozenset({"success", "no_change", "partial", "blocked", "failed"})
 VERIFICATION_CONFIDENCE = {
+    # Fetching the description from the listing's own URL proves it resolved and
+    # returned real content: strong evidence the vacancy is live, but weaker than
+    # a canonical/official source, which is verified as well as authoritative.
+    "description_fetched": 85,
     "verified_official_source": 95,
     "canonical_source_verified": 95,
     "official_canonical_active": 95,
@@ -460,6 +464,171 @@ def reconcile_contact_routes(connection: sqlite3.Connection) -> None:
             )
         )
         connection.execute("UPDATE contact_routes SET is_verified=? WHERE id=?", (verified, route["id"]))
+
+
+SOURCE_ALIASES = {
+    "linkedin": "linkedin", "linked in": "linkedin", "linked-in": "linkedin",
+    "weworkremotely": "weworkremotely", "we work remotely": "weworkremotely",
+    "remoteok": "remoteok", "remote ok": "remoteok",
+}
+
+
+def normalize_source(value: object) -> str:
+    """Collapse source spellings so one board is counted once.
+
+    The dashboard listed 54 "sources" for roughly 20 real boards because
+    'linkedin' and 'LinkedIn' were distinct strings, splitting 103 rows in two.
+    """
+    text = str(value or "").strip().casefold()
+    if not text:
+        return "unknown"
+    collapsed = re.sub(r"[\s_-]+", " ", text).strip()
+    squashed = collapsed.replace(" ", "")
+    return SOURCE_ALIASES.get(collapsed) or SOURCE_ALIASES.get(squashed) or collapsed
+
+
+_DUPLICATE_NOISE = re.compile(
+    r"\((?:h/f|f/h|m/f|f/m|m/w|w/m)\)|\b(?:h/f|f/h|m/f|f/m)\b|[^\w\s]", re.IGNORECASE
+)
+
+
+def duplicate_key(title: object, company: object, location: object = "") -> str:
+    """Identity of a vacancy independent of which URL it was posted under.
+
+    content_hash only catches byte-identical rows, so the same job re-posted on a
+    second board stayed as two entries. Title + company + location catches those.
+    """
+    def clean(value: object) -> str:
+        text = str(value or "").strip().casefold()
+        text = _DUPLICATE_NOISE.sub(" ", text)
+        return re.sub(r"\s+", " ", text).strip()
+
+    return "|".join((clean(title), clean(company), clean(location)))
+
+
+def auto_advance_statuses(db_path: PathLike) -> list[dict]:
+    """Advance `discovered` jobs that already satisfy the verification gate.
+
+    Status is derived state, not manual bookkeeping. A job whose description was
+    fetched from its own URL (confidence >= 80) and that is still fresh has already
+    met every condition the transition guard asks for, so making a human click
+    through it one by one only produced a 276-job backlog.
+
+    Deliberately conservative:
+      * only `discovered` -> `verified_active`, the one purely evidence-based hop;
+      * `eligible`/`shortlisted` still need a human, because they encode judgement;
+      * NEVER advances to `user_applied` -- applying is the user's action alone;
+      * every move is logged to lifecycle_events with confirmed_by_user = 0 so a
+        system decision is always distinguishable from the user's own, and
+        reversible.
+
+    Idempotent: a second run finds nothing left to move. Returns the moves made.
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    moved: list[dict] = []
+    with closing(connect(db_path)) as connection:
+        connection.row_factory = sqlite3.Row
+        rows = connection.execute(
+            """SELECT id, status, verification_confidence, freshness_status
+                 FROM opportunities
+                WHERE status = 'discovered'
+                  AND verification_confidence >= 80
+                  AND freshness_status IN ('active', 'recent')"""
+        ).fetchall()
+        for row in rows:
+            connection.execute(
+                "UPDATE opportunities SET status='verified_active', updated_at=? WHERE id=?",
+                (now, row["id"]),
+            )
+            connection.execute(
+                """INSERT OR IGNORE INTO lifecycle_events(
+                       id, entity_type, entity_id, from_status, to_status,
+                       occurred_at, confirmed_by_user
+                   ) VALUES (?, 'opportunity', ?, ?, ?, ?, 0)""",
+                (
+                    stable_id("life", "opportunity", row["id"],
+                              row["status"], "verified_active", now),
+                    row["id"], row["status"], "verified_active", now,
+                ),
+            )
+            moved.append({
+                "id": row["id"],
+                "from_status": row["status"],
+                "to_status": "verified_active",
+            })
+        connection.commit()
+    return moved
+
+
+TRIAGE_STATUSES = ("verified_active", "eligible")
+
+
+def triage_next(db_path: PathLike) -> dict | None:
+    """Serve the highest-priority job still awaiting a human judgement call.
+
+    Evidence can prove a vacancy is live (auto_advance_statuses does that), but
+    whether it is worth pursuing is a decision only the user can make. This serves
+    one job at a time with everything needed to decide, so clearing a backlog is a
+    short keyboard session instead of a drawer-click per job.
+
+    Skipped jobs are held in source_json.triage_skipped rather than a status change,
+    because "not now" is not a decision about the job.
+    """
+    marks = ", ".join("?" for _ in TRIAGE_STATUSES)
+    with closing(connect(db_path)) as connection:
+        connection.row_factory = sqlite3.Row
+        rows = connection.execute(
+            f"""SELECT id, title, company, url, description, source, priority_score,
+                       fit_score, verification_confidence, freshness_status,
+                       eligibility_status, status, source_json
+                  FROM opportunities
+                 WHERE status IN ({marks})
+                 ORDER BY priority_score DESC, updated_at DESC""",
+            TRIAGE_STATUSES,
+        ).fetchall()
+
+    pending = []
+    for row in rows:
+        try:
+            source = json.loads(row["source_json"] or "{}")
+        except json.JSONDecodeError:
+            source = {}
+        if isinstance(source, dict) and source.get("triage_skipped"):
+            continue
+        pending.append(row)
+
+    if not pending:
+        return None
+
+    row = pending[0]
+    job = {key: row[key] for key in row.keys() if key != "source_json"}
+    job["remaining"] = len(pending)
+    return job
+
+
+def triage_skip(db_path: PathLike, opportunity_id: str) -> dict:
+    """Mark a job as 'not now' without deciding anything about it."""
+    now = datetime.now(timezone.utc).isoformat()
+    with closing(connect(db_path)) as connection:
+        connection.row_factory = sqlite3.Row
+        row = connection.execute(
+            "SELECT source_json FROM opportunities WHERE id=?", (opportunity_id,)
+        ).fetchone()
+        if row is None:
+            raise ValidationError(f"unknown opportunity: {opportunity_id}")
+        try:
+            source = json.loads(row["source_json"] or "{}")
+        except json.JSONDecodeError:
+            source = {}
+        if not isinstance(source, dict):
+            source = {}
+        source["triage_skipped"] = now
+        connection.execute(
+            "UPDATE opportunities SET source_json=?, updated_at=? WHERE id=?",
+            (json.dumps(source, ensure_ascii=False), now, opportunity_id),
+        )
+        connection.commit()
+    return {"id": opportunity_id, "triage_skipped": now}
 
 
 def reconcile_opportunity_scores(connection: sqlite3.Connection) -> None:
@@ -1684,6 +1853,9 @@ def make_handler(db_path: PathLike, static_root: PathLike):
                         record_id = unquote(endpoint.removeprefix("interview/"))
                         self._json(200, interview_prep.get_prep(database, record_id))
                         return
+                    if endpoint == "triage/next":
+                        self._json(200, {"job": triage_next(database)})
+                        return
                     if endpoint == "cover-letters":
                         import cover_letter
                         from urllib.parse import parse_qs
@@ -1879,6 +2051,10 @@ def make_handler(db_path: PathLike, static_root: PathLike):
                 self._enforce_local_host()
                 self._enforce_same_origin()
                 path = self.path.split("?", 1)[0]
+                if path == "/api/triage/skip":
+                    payload = self._payload()
+                    self._json(200, triage_skip(database, str(payload.get("id") or "")))
+                    return
                 if path == "/api/applications/prepare":
                     import application_prep
 

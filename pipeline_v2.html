@@ -41,6 +41,20 @@
     .section-head h2{margin:0;font-size:var(--fs-lg)}
     .section-head h3{margin:0;font-size:var(--fs-md)}
     .section-head p{margin:2px 0 0;color:var(--muted);font-size:var(--fs-sm)}
+    /* Triage: one job at a time, built for the keyboard. */
+    .triage-panel{padding:0;overflow:hidden}
+    .triage-card[hidden],.triage-empty[hidden]{display:none}
+    .triage-empty{padding:48px 28px;text-align:center}
+    .triage-empty-title{margin:0 0 6px;font-size:var(--fs-lg);font-weight:600}
+    .triage-head{padding:22px 28px 16px;border-bottom:1px solid var(--border)}
+    .triage-company{margin:0;color:var(--muted);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.06em}
+    .triage-role{margin:4px 0 8px;font-size:var(--fs-lg);line-height:1.25}
+    .triage-meta{margin:0;color:var(--muted);font-size:var(--fs-sm)}
+    .triage-body{padding:20px 28px;max-height:46vh;overflow-y:auto;white-space:pre-wrap;line-height:1.6;font-size:var(--fs-sm)}
+    .triage-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:16px 28px;border-top:1px solid var(--border);background:var(--surface-2)}
+    .triage-actions .status-line{margin:0;flex:1 1 auto;text-align:right}
+    .triage-actions .key{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;margin-right:6px;padding:0 4px;border:1px solid var(--border);border-radius:4px;background:var(--surface);font-size:11px;font-weight:600;color:var(--muted)}
+    .triage-hint{margin:0;padding:12px 28px 20px;font-size:var(--fs-xs)}
     .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
     .notice{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--border);border-left:3px solid var(--warning);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:var(--fs-sm)}
     .notice svg{width:18px;height:18px;flex:0 0 auto;margin-top:1px;color:var(--warning)}.notice strong{display:block}.notice p{margin:2px 0 0;color:var(--muted)}
@@ -266,6 +280,7 @@
       <nav class="nav" id="page-nav">
         <a href="#/overview" data-route="overview"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Overview</span></a>
         <a href="#/opportunities" data-route="opportunities"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg><span>Opportunities</span></a>
+        <a href="#/triage" data-route="triage"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg><span>Triage</span></a>
         <a href="#/tracker" data-route="tracker"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Tracker</span></a>
         <a href="#/cvs" data-route="cvs"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg><span>CVs</span></a>
         <a href="#/contacts" data-route="contacts"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Contacts</span></a>
@@ -397,6 +412,33 @@
           <div class="panel">
             <div class="skills-actions"><span class="status-line" id="skills-feedback"></span><button type="button" id="skills-recompute" class="compact-button">Recompute all</button></div>
             <div class="table-wrap"><table class="data-table" style="min-width:520px"><thead><tr><th>Skill</th><th>Open jobs asking</th><th>You have it</th></tr></thead><tbody id="skills-rows"><tr><td colspan="3" class="loading">Loading skill gaps</td></tr></tbody></table></div>
+          </div>
+        </section>
+      </div>
+      <div class="page" id="page-triage">
+        <section id="triage" aria-labelledby="triage-title">
+          <h2 id="triage-title" class="sr-only">Triage</h2>
+          <div class="page-meta"><span class="secondary" id="triage-count"></span></div>
+          <div class="panel triage-panel">
+            <div id="triage-empty" class="triage-empty" hidden>
+              <p class="triage-empty-title">Queue clear</p>
+              <p class="secondary">Nothing is waiting on a decision. New jobs appear here after the next run.</p>
+            </div>
+            <article id="triage-card" class="triage-card" aria-live="polite">
+              <header class="triage-head">
+                <p class="triage-company" id="triage-company"></p>
+                <h3 class="triage-role" id="triage-role"></h3>
+                <p class="triage-meta"><span id="triage-scores"></span> &middot; <a id="triage-link" href="#" target="_blank" rel="noopener noreferrer">Open listing</a></p>
+              </header>
+              <div class="triage-body" id="triage-description"></div>
+              <footer class="triage-actions">
+                <button type="button" class="btn" id="triage-skip"><span class="key">S</span> Skip</button>
+                <button type="button" class="btn btn-primary" id="triage-shortlist"><span class="key">L</span> Shortlist</button>
+                <button type="button" class="btn" id="triage-close"><span class="key">X</span> Not relevant</button>
+                <span class="status-line" id="triage-feedback"></span>
+              </footer>
+              <p class="triage-hint secondary">Keyboard: <strong>S</strong> skip &middot; <strong>L</strong> shortlist &middot; <strong>X</strong> not relevant &middot; <strong>O</strong> open listing. Triage never applies or sends anything.</p>
+            </article>
           </div>
         </section>
       </div>
@@ -661,6 +703,7 @@
     const routes = {
       overview: 'Overview',
       opportunities: 'Opportunity inventory',
+      triage: 'Triage',
       cvs: 'CV readiness',
       contacts: 'Contacts',
       drafts: 'Drafts',
@@ -691,8 +734,116 @@
       announce(`${routes[route]} page shown.`);
       if (route === 'skills' && state.gaps === null) loadSkillGaps();
       if (route === 'tracker' && typeof loadTracker === 'function') loadTracker();
+      if (route === 'triage') loadTriage();
     }
     window.addEventListener('hashchange', renderRoute);
+
+    // --- Triage -------------------------------------------------------------
+    // One job, one decision, keyboard-first. Clears a backlog that a drawer-per-job
+    // interface never could. Shortlist and close are decisions; skip is "not now".
+    // No control here applies or sends anything.
+    const triageState = {job: null, busy: false};
+
+    function triageSay(message) {
+      const feedback = byId('triage-feedback');
+      if (feedback) feedback.textContent = message || '';
+    }
+
+    function renderTriage() {
+      const job = triageState.job;
+      const card = byId('triage-card');
+      const empty = byId('triage-empty');
+      const count = byId('triage-count');
+      if (!card || !empty) return;
+      if (!job) {
+        card.hidden = true;
+        empty.hidden = false;
+        if (count) count.textContent = 'Nothing waiting on a decision';
+        return;
+      }
+      card.hidden = false;
+      empty.hidden = true;
+      if (count) count.textContent = `${job.remaining} waiting on a decision`;
+      byId('triage-company').textContent = job.company || 'Unknown company';
+      byId('triage-role').textContent = job.title || 'Untitled role';
+      const fit = normalizeScore(job.fit_score);
+      const priority = normalizeScore(job.priority_score);
+      byId('triage-scores').textContent =
+        `Priority ${priority === null ? '--' : priority} · Fit ${fit === null ? '--' : fit}`;
+      const link = byId('triage-link');
+      const href = safeHref(job.url);
+      if (href) { link.href = href; link.hidden = false; } else { link.hidden = true; }
+      byId('triage-description').textContent =
+        (job.description || '').trim() || 'No description was captured for this listing.';
+      byId('triage-description').scrollTop = 0;
+    }
+
+    async function loadTriage() {
+      triageSay('Loading');
+      try {
+        const response = await fetch('/api/triage/next', {headers: {'Accept': 'application/json'}});
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        triageState.job = data.job || null;
+        renderTriage();
+        triageSay('');
+      } catch (error) {
+        triageSay(`Could not load the queue: ${error.message}`);
+      }
+    }
+
+    async function triageDecide(kind) {
+      const job = triageState.job;
+      if (!job || triageState.busy) return;
+      triageState.busy = true;
+      const labels = {skip: 'Skipped', shortlisted: 'Shortlisted', closed: 'Marked not relevant'};
+      try {
+        let response;
+        if (kind === 'skip') {
+          response = await fetch('/api/triage/skip', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+            body: JSON.stringify({id: job.id})
+          });
+        } else {
+          response = await fetch(`/api/opportunities/${encodeURIComponent(job.id)}`, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+            body: JSON.stringify({status: kind, confirmed_by_user: true})
+          });
+        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        announce(`${labels[kind]}: ${job.title || 'job'}.`);
+        await loadTriage();
+        triageSay(labels[kind]);
+      } catch (error) {
+        triageSay(`Could not save that: ${error.message}`);
+      } finally {
+        triageState.busy = false;
+      }
+    }
+
+    document.addEventListener('keydown', event => {
+      if (currentRoute() !== 'triage') return;
+      const tag = (event.target && event.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (key === 's') { event.preventDefault(); triageDecide('skip'); }
+      else if (key === 'l') { event.preventDefault(); triageDecide('shortlisted'); }
+      else if (key === 'x') { event.preventDefault(); triageDecide('closed'); }
+      else if (key === 'o') {
+        const href = triageState.job && safeHref(triageState.job.url);
+        if (href) { event.preventDefault(); window.open(href, '_blank', 'noopener,noreferrer'); }
+      }
+    });
+
+    ['skip', 'shortlist', 'close'].forEach(kind => {
+      const button = byId(`triage-${kind}`);
+      if (!button) return;
+      const action = kind === 'skip' ? 'skip' : (kind === 'shortlist' ? 'shortlisted' : 'closed');
+      button.addEventListener('click', () => triageDecide(action));
+    });
 
     function normalizeScore(value) {
       const number = Number(value);

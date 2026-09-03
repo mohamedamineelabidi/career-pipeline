@@ -47,14 +47,32 @@ It runs entirely on `127.0.0.1`. There is no hosted service, no account, and no 
 git clone https://github.com/your-github-handle/career-pipeline.git
 cd career-pipeline
 
-uv sync                                  # or: pip install -e .
-uv run playwright install chromium       # only needed for PDF preview
+uv sync                                  # core install, ~9 MB
+```
 
+The core install collects, scores, triages and tracks jobs, and serves the whole
+dashboard. The heavy stacks are optional, so trying this out does not cost a
+gigabyte:
+
+```bash
+uv sync --extra ml        # embedding-based scoring (pulls torch, ~500 MB)
+uv sync --extra cv        # render CVs to PDF
+uv sync --extra browser   # job-board scraping that needs a real browser
+uv sync --extra all       # everything
+```
+
+Without `ml`, scoring uses TF-IDF instead of embeddings. That is a real
+difference in quality, not a stub, and it is good enough to triage a backlog.
+
+```bash
 # Build your profile from the templates
 cp reference_cv_2027/data/career_master.example.yaml       reference_cv_2027/data/career_master.yaml
 cp reference_cv_2027/data/evidence_register.example.yaml   reference_cv_2027/data/evidence_register.yaml
 cp reference_cv_2027/data/tailoring_knowledge.example.yaml reference_cv_2027/data/tailoring_knowledge.yaml
 # edit those three files with your own facts
+
+# Check the profile before you rely on it
+uv run python profile_validator.py --profile reference_cv_2027/data/career_master.yaml
 
 uv run python migrate_pipeline_v2.py init --db career_pipeline_v2.sqlite3
 uv run python migrate_pipeline_v2.py serve --db career_pipeline_v2.sqlite3 --port 8786
@@ -62,11 +80,26 @@ uv run python migrate_pipeline_v2.py serve --db career_pipeline_v2.sqlite3 --por
 
 Open <http://127.0.0.1:8786/pipeline_v2.html>. The **Guide** page inside the app explains every screen and the recommended daily routine.
 
+`profile_validator.py` is worth running first. An unrecognised `evidence_status`
+does not raise: the profile simply yields no facts, and scoring and cover letters
+fail later with an unhelpful error. The validator names the entry, the bad value
+and the accepted ones.
+
 To collect openings:
 
 ```bash
 uv run python pipeline_runner.py --db career_pipeline_v2.sqlite3
 ```
+
+### Triage
+
+Collecting jobs is easy; deciding on them is the bottleneck. The **Triage** page
+serves one job at a time, highest priority first, with the full description:
+
+- <kbd>L</kbd> shortlist &middot; <kbd>X</kbd> not relevant &middot; <kbd>S</kbd> skip for now &middot; <kbd>O</kbd> open the listing
+
+Nothing on that page applies or sends anything, and a test enforces it.
+
 
 ### Optional LLM scoring
 
@@ -106,11 +139,15 @@ LLM_BASE_URL=https://api.groq.com/openai/v1
 uv run python -m pytest tests -q
 ```
 
-24 test files cover ingestion, scoring, CV rendering, outreach state machines, the HTTP layer and the frontend safety rules.
+31 test files cover ingestion, scoring, CV rendering, outreach state machines, the HTTP layer, the frontend safety rules, and the guarantee that a core install runs without the optional extras.
 
 ## Stack
 
-Python 3.11 standard library `http.server` · SQLite with FTS5 · sentence-transformers · scikit-learn · RenderCV + Typst · Jinja2 · feedparser · JobSpy · Playwright · vanilla JavaScript. No web framework, no ORM, no bundler.
+**Core** (~9 MB): Python 3.11 standard library `http.server` · SQLite with FTS5 · Jinja2 · feedparser · rapidfuzz · vanilla JavaScript.
+
+**Optional extras**: sentence-transformers and scikit-learn (`ml`) · RenderCV + Typst and pypdf (`cv`) · JobSpy and Playwright (`browser`).
+
+No web framework, no ORM, no bundler.
 
 ## License
 

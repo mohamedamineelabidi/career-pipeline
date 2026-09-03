@@ -199,6 +199,31 @@ def classify(url: str, result: FetchResult) -> tuple[str, str]:
     return "ok", description
 
 
+FETCH_SUCCESS_MARKERS = frozenset({"ok", "ok_reader"})
+
+
+def award_fetch_confidence(source: dict, marker: str) -> dict:
+    """Record that the description was fetched from the listing's own URL.
+
+    A successful fetch is evidence the vacancy resolved and returned real content,
+    so it earns verification confidence (85 via VERIFICATION_CONFIDENCE). Without
+    this, ingesters' hardcoded "unverified" (confidence 0) makes the >=80 advance
+    gate unreachable and every job freezes in `discovered`.
+
+    Never downgrades stronger existing evidence, and awards nothing on failure.
+    """
+    if marker not in FETCH_SUCCESS_MARKERS:
+        return source
+    import pipeline_v2
+
+    current = str(source.get("source_verification_status") or "").strip().casefold()
+    earned = pipeline_v2.VERIFICATION_CONFIDENCE.get("description_fetched", 0)
+    if pipeline_v2.VERIFICATION_CONFIDENCE.get(current, 0) >= earned:
+        return source
+    source["source_verification_status"] = "description_fetched"
+    return source
+
+
 def candidates(connection) -> list[dict]:
     rows = connection.execute(
         "SELECT id, url, description, source_json, updated_at FROM opportunities "
@@ -259,6 +284,7 @@ def run(db_path, *, fetcher=default_fetcher, sleep=time.sleep, limit: int | None
             source["jd_fetched_at"] = now
             if status == "ok":
                 source["full_job_description"] = description
+                award_fetch_confidence(source, status)
                 connection.execute(
                     "UPDATE opportunities SET description=?, source_json=?, updated_at=? WHERE id=?",
                     (description, json.dumps(source, ensure_ascii=False), now, row["id"]),
@@ -342,6 +368,7 @@ def run_reader(db_path, *, reader=None, limit: int | None = None, dry_run: bool 
             if marker in ("ok", "ok_reader"):
                 source["jd_backend"] = backend
                 source["full_job_description"] = text
+                award_fetch_confidence(source, marker)
                 connection.execute(
                     "UPDATE opportunities SET description=?, source_json=?, updated_at=? WHERE id=?",
                     (text, json.dumps(source, ensure_ascii=False), now, row["id"]),

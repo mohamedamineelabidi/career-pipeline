@@ -1,21 +1,45 @@
 [project]
-name = "career-pipeline-v2"
-version = "0.1.0"
+name = "career-pipeline"
+version = "0.2.0"
 description = "Local evidence-backed career opportunity, CV and outreach pipeline"
 requires-python = ">=3.11"
+
+# Core: collect, score, triage and track jobs, and serve the dashboard.
+# Deliberately small and pure-Python so `uv sync` is quick on a fresh clone.
+# Scoring falls back to TF-IDF when the optional embedding stack is absent, which
+# is verified by tests rather than assumed.
 dependencies = [
   "Jinja2>=3.1,<4",
   "PyYAML>=6,<7",
   "feedparser>=6.0.14",
-  "playwright>=1.62.0",
-  "pypdf>=6,<7",
-  "pypdfium2>=4,<6",
-  "python-jobspy>=1.1.82",
   "rapidfuzz>=3.14.6",
-  "rendercv[full]>=2.3,<2.4",
+]
+
+[project.optional-dependencies]
+# Embedding-based semantic scoring. Pulls torch (~500 MB); without it scoring
+# uses TF-IDF, which is honest and fine for triage.
+ml = [
   "scikit-learn>=1.9.0",
   "sentence-transformers>=6.0.1",
+]
+
+# CV rendering to PDF.
+cv = [
+  "pypdf>=6,<7",
+  "pypdfium2>=4,<6",
+  "rendercv[full]>=2.3,<2.4",
   "typst>=0.13,<0.14",
+]
+
+# Job-board scraping and page fetching that need a real browser.
+browser = [
+  "playwright>=1.62.0",
+  "python-jobspy>=1.1.82",
+]
+
+# Everything, matching the pre-0.2 single-bucket install.
+all = [
+  "career-pipeline[ml,cv,browser]",
 ]
 
 [dependency-groups]

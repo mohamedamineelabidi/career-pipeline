@@ -195,7 +195,7 @@ def map_job(record: dict, query: dict) -> dict | None:
     company = _clean(record.get("company") or record.get("company_name")) or "Unknown"
     location = _clean(record.get("location"))
     description = _clean(record.get("description"))
-    site = _clean(record.get("site")).casefold() or "jobspy"
+    site = pipeline_v2.normalize_source(record.get("site") or "jobspy")
     emails = record.get("emails")
     if isinstance(emails, str):
         emails = [part.strip() for part in emails.split(",") if part.strip()]
