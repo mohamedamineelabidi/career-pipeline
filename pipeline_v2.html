@@ -6,10 +6,16 @@
   <meta name="color-scheme" content="light">
   <title>Pipeline v2 - Career command center</title>
   <style>
-    :root{--bg:#f4f5f7;--surface:#ffffff;--surface-2:#f0f2f5;--border:#dfe3e8;--line:var(--border);--text:#151a21;--muted:#5d6774;--accent:#2457d6;--accent-soft:rgba(36,87,214,.1);--success:#1f8a5b;--success-soft:rgba(31,138,91,.12);--warning:#b26a00;--warning-soft:rgba(178,106,0,.12);--danger:#c0392b;--danger-soft:rgba(192,57,43,.12);--radius:8px;--shadow:0 1px 2px rgba(15,23,42,.06);--fs-xs:11px;--fs-sm:12px;--fs-md:14px;--fs-lg:16px;--fs-xl:20px;--fs-2xl:26px;--sidebar:232px;--header-h:64px}
+    :root{--bg:#f4f5f7;--surface:#ffffff;--surface-2:#f0f2f5;--border:#dfe3e8;--line:var(--border);--text:#151a21;--muted:#5d6774;--accent:#2457d6;--accent-soft:rgba(36,87,214,.1);--success:#1f8a5b;--success-soft:rgba(31,138,91,.12);--warning:#b26a00;--warning-soft:rgba(178,106,0,.12);--danger:#c0392b;--danger-soft:rgba(192,57,43,.12);--radius:8px;--radius-lg:12px;--shadow:0 1px 2px rgba(15,23,42,.06);--elev-1:0 1px 3px rgba(15,23,42,.06);--elev-2:0 4px 12px rgba(15,23,42,.08);--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--muted-strong:#475569;--fs-xs:11px;--fs-sm:12px;--fs-md:14px;--fs-lg:16px;--fs-xl:20px;--fs-2xl:26px;--sidebar:232px;--header-h:64px}
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{margin:0;background:var(--bg);color:var(--text);font:var(--fs-md)/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+    body{margin:0;background:var(--bg);color:var(--text);font:var(--fs-md)/1.5 var(--font);-webkit-font-smoothing:antialiased}
+    /* One badge vocabulary for the whole app: tone carries meaning, not decoration. */
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:var(--fs-xs);font-weight:600;line-height:1.6;white-space:nowrap}
+    .badge-good{background:var(--success-soft);color:var(--success)}
+    .badge-warn{background:var(--warning-soft);color:var(--warning)}
+    .badge-neutral{background:var(--surface-2);color:var(--muted-strong)}
+    .badge-row{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
     a{color:inherit}
     h1,h2,h3,h4{font-weight:650;letter-spacing:-.01em}
     .skip-link{position:fixed;left:1rem;top:-5rem;z-index:40;background:var(--accent);color:#fff;padding:.6rem 1rem;border-radius:var(--radius);font-weight:600}.skip-link:focus{top:1rem}
@@ -55,7 +61,8 @@
     .triage-actions .status-line{margin:0;flex:1 1 auto;text-align:right}
     .triage-actions .key{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;margin-right:6px;padding:0 4px;border:1px solid var(--border);border-radius:4px;background:var(--surface);font-size:11px;font-weight:600;color:var(--muted)}
     .triage-hint{margin:0;padding:12px 28px 20px;font-size:var(--fs-xs)}
-    .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+    /* Soft elevation instead of a heavy gray rule. */
+    .panel{background:var(--surface);border:1px solid transparent;border-radius:var(--radius-lg);box-shadow:var(--elev-1)}
     .notice{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--border);border-left:3px solid var(--warning);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:var(--fs-sm)}
     .notice svg{width:18px;height:18px;flex:0 0 auto;margin-top:1px;color:var(--warning)}.notice strong{display:block}.notice p{margin:2px 0 0;color:var(--muted)}
     .metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:12px}
@@ -85,11 +92,11 @@
     :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     .table-wrap{overflow:auto;max-height:calc(100vh - 330px)}
     .data-table{width:100%;min-width:820px;border-collapse:separate;border-spacing:0}
-    .data-table thead th{position:sticky;top:0;z-index:2;padding:10px 12px;background:var(--surface-2);border-bottom:1px solid var(--border);color:var(--muted);font-size:var(--fs-xs);letter-spacing:.06em;text-align:left;text-transform:uppercase;white-space:nowrap}
+    .data-table thead th{position:sticky;top:0;z-index:2;padding:10px 12px;background:var(--surface-2);border-bottom:1px solid var(--border);color:var(--muted-strong);font-size:var(--fs-xs);letter-spacing:.06em;text-align:left;text-transform:uppercase;white-space:nowrap}
     .data-table td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:top;font-size:var(--fs-sm)}
     .data-table tbody tr:last-child td{border-bottom:0}
     .data-table tbody tr:hover td{background:rgba(36,87,214,.03)}
-    .primary{font-weight:600;font-size:var(--fs-md)}.secondary{margin-top:2px;color:var(--muted);font-size:var(--fs-sm)}
+    .primary{font-weight:600;font-size:var(--fs-md)}.secondary{margin-top:2px;color:var(--muted-strong);font-size:var(--fs-sm)}
     .score{display:inline-flex;min-width:52px;justify-content:center;border-radius:999px;padding:2px 8px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums;font-size:var(--fs-sm)}
     .status-line{min-height:18px;margin-top:4px;color:var(--muted);font-size:var(--fs-xs)}.status-line.error{color:var(--danger)}.status-line.success{color:var(--success)}
     .safe-link{display:inline-flex;align-items:center;gap:5px;color:var(--accent);font-weight:600;text-decoration-thickness:1px;text-underline-offset:3px}
@@ -142,7 +149,15 @@
     img.pdf-frame{display:block;width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius);margin-top:10px;background:#fff}
     .opp-wrap{max-height:calc(100vh - 250px)}.opp-table{table-layout:fixed;min-width:1000px;width:100%}.opp-table th,.opp-table td{vertical-align:top;padding:8px 10px}
     .opp-table thead th{position:sticky;top:0;background:var(--panel,#fff);z-index:2;box-shadow:0 1px 0 var(--border,#e5e7eb)}
-    .opp-table th:nth-child(1){width:23%}.opp-table th:nth-child(2){width:9%}.opp-table th:nth-child(3){width:7%}.opp-table th:nth-child(4){width:8%}.opp-table th:nth-child(5){width:9%}.opp-table th:nth-child(6){width:11%}.opp-table th:nth-child(7){width:6%}.opp-table th:nth-child(8){width:11%}.opp-table th:nth-child(9){width:16%}@media(max-width:1500px){.opp-table th:nth-child(6){width:10%}.opp-table th:nth-child(9){width:17%}.opp-actions .compact-button{padding:3px 5px}}
+    .opp-check{width:36px;text-align:center}
+    .opp-check input{width:15px;height:15px;cursor:pointer;accent-color:var(--accent)}
+    .opp-bulk-bar{position:sticky;bottom:0;z-index:3;display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 14px;background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--elev-2)}
+    .opp-bulk-bar[hidden]{display:none}
+    .opp-bulk-bar #opp-bulk-count{font-weight:600;font-size:var(--fs-sm)}
+    .opp-link-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:6px;border:0;border-radius:6px;background:transparent;color:var(--muted-strong);cursor:pointer;vertical-align:middle}
+    .opp-link-icon:hover{background:var(--surface-2);color:var(--accent)}
+    .opp-link-icon svg{width:14px;height:14px}
+    .opp-table th:nth-child(2){width:23%}.opp-table th:nth-child(3){width:9%}.opp-table th:nth-child(4){width:7%}.opp-table th:nth-child(5){width:8%}.opp-table th:nth-child(6){width:9%}.opp-table th:nth-child(7){width:11%}.opp-table th:nth-child(8){width:6%}.opp-table th:nth-child(9){width:11%}.opp-table th:nth-child(10){width:16%}@media(max-width:1500px){.opp-table th:nth-child(7){width:10%}.opp-table th:nth-child(10){width:17%}.opp-actions .compact-button{padding:3px 5px}}
     .opp-row td{overflow:hidden}.opp-job .link-button.primary{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:left;text-decoration:none}a.link-button.primary:hover{color:var(--accent);text-decoration:underline}
     .opp-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.opp-chips .chip{font-size:11px;padding:1px 6px}
     .opp-location{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.small{font-size:11px;margin-top:3px}
@@ -243,6 +258,38 @@
     .kcard select{flex:1;min-width:0;font-size:var(--fs-xs);padding:3px 8px;min-height:26px;box-shadow:none}
     @media(max-width:760px){.kanban{height:auto}.kanban-col{max-height:70vh}}
     #drawer{position:fixed;top:0;right:0;height:100vh;width:min(560px,100vw);background:var(--panel,#fff);border-left:1px solid var(--line,#ddd);box-shadow:-12px 0 32px rgba(0,0,0,.15);z-index:60;display:flex;flex-direction:column}
+    /* Charts: hand-rolled inline SVG, no external library. */
+    .chart-wrap{margin-top:10px;overflow-x:auto}
+    .chart{display:block;max-width:100%;height:auto}
+    .chart-label{font-size:11px;fill:var(--muted-strong)}
+    .chart-value{font-size:11px;fill:var(--text);font-weight:600}
+    .chart-axis{font-size:10px;fill:var(--muted)}
+    .funnel-base{fill:var(--surface-2)}
+    .funnel-fill{fill:var(--accent);fill-opacity:.85}
+    .heat-cell{fill:var(--accent)}
+    .heat-cell.is-empty{fill:var(--surface-2)}
+    .heat-value{font-size:11px;fill:#fff;font-weight:600;pointer-events:none}
+    .plot-frame{fill:var(--surface-2);stroke:var(--border)}
+    .plot-diagonal{stroke:var(--muted);stroke-dasharray:3 3;stroke-width:1}
+    .plot-dot{fill:var(--accent);fill-opacity:.65}
+    .plot-dot.is-far{fill:#d97706;fill-opacity:.95}
+    /* Drafts: email-client shape. List rail left, full prose right. */
+    .draft-split{display:grid;grid-template-columns:minmax(240px,320px) 1fr;gap:12px;align-items:start}
+    .draft-rail{padding:6px;max-height:calc(100vh - 260px);overflow:auto;display:flex;flex-direction:column;gap:2px}
+    .draft-row{display:flex;flex-direction:column;gap:2px;width:100%;padding:9px 11px;border:0;border-radius:var(--radius);background:transparent;text-align:left;cursor:pointer;font:inherit}
+    .draft-row:hover{background:var(--surface-2)}
+    .draft-row.is-active{background:var(--accent-soft,rgba(37,99,235,.1));box-shadow:inset 2px 0 0 var(--accent)}
+    .draft-row-subject{font-weight:600;font-size:var(--fs-sm);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .draft-row-to{font-size:var(--fs-xs);color:var(--muted-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .draft-row-snippet{font-size:var(--fs-xs);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .draft-row .badge{align-self:flex-start;margin-top:3px}
+    .draft-detail{padding:18px 20px;min-height:320px}
+    .draft-detail h3{margin:0 0 2px;font-size:16px}
+    .draft-body{white-space:pre-wrap;word-break:break-word;font:inherit;line-height:1.6;margin:14px 0 10px;padding:14px 16px;background:var(--surface-2);border-radius:var(--radius);max-height:46vh;overflow:auto}
+    .draft-placeholder{background:rgba(217,119,6,.16);color:#92400e;border-radius:4px;padding:0 3px;font-weight:600}
+    @media(max-width:900px){.draft-split{grid-template-columns:1fr}.draft-rail{max-height:260px}}
+    #drawer-backdrop{position:fixed;inset:0;z-index:59;background:rgba(15,23,42,.32);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+    #drawer-backdrop[hidden]{display:none}
     #drawer[hidden]{display:none}
     .drawer-head{display:flex;justify-content:space-between;align-items:start;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line,#ddd)}.drawer-head h2{margin:0;font-size:16px}.drawer-head p{margin:4px 0 0;color:var(--muted,#666);font-size:12px}
     .drawer-tabs{display:flex;gap:2px;padding:0 10px;border-bottom:1px solid var(--line,#ddd);overflow-x:auto}
@@ -356,7 +403,8 @@
               <label class="field" for="opportunity-sort"><span class="field-label">Sort</span><select id="opportunity-sort"><option value="priority_desc">Priority</option><option value="fit_desc">Best fit</option><option value="posted_desc">Newest</option><option value="deadline_asc">Deadline</option></select></label>
             </div>
             <div class="feature-note" id="search-mode" hidden></div>
-            <div class="table-wrap opp-wrap"><table class="data-table opp-table"><thead><tr><th>Job</th><th>Location</th><th>Posted</th><th>Fit</th><th>Semantic</th><th>Eligibility</th><th>CV</th><th>Status</th><th>Actions</th></tr></thead><tbody id="opportunity-rows"><tr><td colspan="9" class="loading">Loading opportunities</td></tr></tbody></table></div>
+            <div class="table-wrap opp-wrap"><table class="data-table opp-table"><thead><tr><th class="opp-check"><input type="checkbox" id="opp-select-all" aria-label="Select all visible jobs"></th><th>Job</th><th>Location</th><th>Posted</th><th>Fit</th><th>Semantic</th><th>Eligibility</th><th>CV</th><th>Status</th><th>Actions</th></tr></thead><tbody id="opportunity-rows"><tr><td colspan="10" class="loading">Loading opportunities</td></tr></tbody></table></div>
+            <div id="opp-bulk-bar" class="opp-bulk-bar" hidden role="region" aria-label="Bulk actions"><span id="opp-bulk-count">0 selected</span><button type="button" id="opp-bulk-close" class="compact-button">Mark irrelevant</button><button type="button" id="opp-bulk-export" class="compact-button">Export selected</button><button type="button" id="opp-bulk-clear" class="compact-button">Clear</button></div>
             <div class="pager" id="opportunity-pager"></div>
           </div>
         </section>
@@ -368,7 +416,7 @@
           <div class="panel toolbar">
             <label class="field" for="cv-search"><span class="field-label">Search</span><input id="cv-search" type="search" placeholder="Role or company"></label>
             <label class="field" for="cv-class-filter"><span class="field-label">Classification</span><select id="cv-class-filter"><option value="">All</option><option value="exact_vacancy">Exact vacancy</option><option value="role_family">Role family</option></select></label>
-            <label class="field" for="cv-has-filter"><span class="field-label">Document</span><select id="cv-has-filter"><option value="">All</option><option value="yes">Has CV</option><option value="no">Missing CV</option></select></label>
+            <label class="field" for="cv-has-filter"><span class="field-label">Document</span><select id="cv-has-filter"><option value="">All</option><option value="yes" selected>Has CV</option><option value="no">Missing CV</option></select></label>
           </div>
           <div class="grid" id="cv-grid" style="margin-top:12px"><div class="panel loading">Loading CV workspace</div></div>
         </section>
@@ -395,7 +443,10 @@
           <div class="panel toolbar single" style="margin-top:12px">
             <label class="field" for="draft-search"><span class="field-label">Search</span><input id="draft-search" type="search" placeholder="Subject or recipient"></label>
           </div>
-          <div class="grid" id="draft-grid" style="margin-top:12px"><div class="panel loading">Loading drafts</div></div>
+          <div class="draft-split" style="margin-top:12px">
+            <div class="draft-rail panel" id="draft-list"><div class="loading">Loading drafts</div></div>
+            <div class="draft-detail panel" id="draft-detail"><div class="empty">Select a draft to read it.</div></div>
+          </div>
         </section>
       </div>
 
@@ -476,7 +527,7 @@
 
               <article class="panel guide-section" id="g-what">
                 <h3>What this platform is</h3>
-                <p>Career Pipeline is a local, private job-search command center for the candidate. It runs only on this computer (127.0.0.1:8786), stores everything in one SQLite file, and never sends anything on your behalf.</p>
+                <p>Career Pipeline is a local, private job-search command center for one person. It runs only on this computer (127.0.0.1:8786), stores everything in one SQLite file, and never sends anything on your behalf.</p>
                 <ul class="guide-list">
                   <li><strong>It finds jobs</strong> from RSS feeds, JobSpy-style boards, and pasted listings, then fetches the full description.</li>
                   <li><strong>It scores them</strong> against your real evidence profile (semantic match, skill gaps, optional Groq rubric score).</li>
@@ -627,6 +678,7 @@
   </div>
   <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="false"></div>
 
+  <div id="drawer-backdrop" hidden></div>
   <aside id="drawer" hidden role="dialog" aria-modal="false" aria-labelledby="drawer-title">
     <div class="drawer-head"><div><h2 id="drawer-title">Details</h2><p id="drawer-subtitle"></p><p id="drawer-listing" class="drawer-listing"></p></div><button type="button" class="drawer-close" id="drawer-close" aria-label="Close details">Close</button></div>
     <div class="drawer-tabs" role="tablist" id="drawer-tabs"></div>
@@ -845,6 +897,29 @@
       button.addEventListener('click', () => triageDecide(action));
     });
 
+    // One pill vocabulary for the whole app: tone carries meaning, not decoration.
+    function badge(label, tone, hint) {
+      const el = document.createElement('span');
+      // Inlined rather than a const map: badge() is hoisted and can be called
+      // before a module-level const is initialised (temporal dead zone).
+      const tones = { good: 'badge-good', warn: 'badge-warn', neutral: 'badge-neutral' };
+      el.className = 'badge ' + (tones[tone] || tones.neutral);
+      el.textContent = label;
+      if (hint) el.title = hint;
+      return el;
+    }
+    function fitTone(score) {
+      const value = normalizeScore(score);
+      if (value === null) return 'neutral';
+      return value >= 75 ? 'good' : (value >= 50 ? 'warn' : 'neutral');
+    }
+    function statusTone(status) {
+      const tones = { eligible: 'good', shortlisted: 'good', user_applied: 'good',
+        verified_active: 'neutral', discovered: 'neutral', closed: 'neutral',
+        needs_verification: 'warn' };
+      return tones[String(status || '').trim()] || 'neutral';
+    }
+
     function normalizeScore(value) {
       const number = Number(value);
       if (!Number.isFinite(number)) return null;
@@ -1040,6 +1115,77 @@
       return select;
     }
 
+    // Bulk selection over the filtered set. Deliberately NO "generate CVs" action:
+    // tailoring is gated on shortlist because 91 of 104 tailored PDFs (129 MB) were
+    // built for jobs that were never triaged. A bulk button would rebuild that waste.
+    var selectedOpportunities = new Set();
+
+    function renderBulkBar() {
+      const bar = byId('opp-bulk-bar');
+      if (!bar) return;
+      const count = selectedOpportunities.size;
+      bar.hidden = count === 0;
+      const label = byId('opp-bulk-count');
+      if (label) label.textContent = `${count} selected`;
+      const all = byId('opp-select-all');
+      if (all) {
+        const boxes = document.querySelectorAll('.opp-table tbody .opp-check input');
+        const checked = [...boxes].filter(b => b.checked).length;
+        all.checked = boxes.length > 0 && checked === boxes.length;
+        all.indeterminate = checked > 0 && checked < boxes.length;
+      }
+    }
+
+    function selectedOpportunityRecords() {
+      return (state.opportunities || []).filter(item => selectedOpportunities.has(String(identifier(item))));
+    }
+
+    function clearOpportunitySelection() {
+      selectedOpportunities.clear();
+      document.querySelectorAll('.opp-table tbody .opp-check input').forEach(b => { b.checked = false; });
+      renderBulkBar();
+    }
+
+    function exportSelectedOpportunities() {
+      const records = selectedOpportunityRecords();
+      if (!records.length) return;
+      const header = ['id', 'title', 'company', 'location', 'status', 'url'];
+      const escape = value => `"${String(value == null ? '' : value).replace(/"/g, '""')}"`;
+      const rows = records.map(item => [
+        identifier(item), valueOf(item, ['title'], ''), valueOf(item, ['company'], ''),
+        valueOf(item, ['location'], ''), valueOf(item, ['status'], ''), listingUrl(item) || '',
+      ].map(escape).join(','));
+      const blob = new Blob([[header.join(','), ...rows].join('\n')], {type: 'text/csv;charset=utf-8'});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `opportunities-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.append(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      showToast(`Exported ${records.length} jobs`, 'success');
+    }
+
+    async function bulkCloseSelected() {
+      const records = selectedOpportunityRecords();
+      if (!records.length) return;
+      if (!window.confirm(`Mark ${records.length} job${records.length === 1 ? '' : 's'} as irrelevant? This only changes their status here.`)) return;
+      let ok = 0; const failed = [];
+      for (const record of records) {
+        const id = identifier(record);
+        try {
+          const response = await fetch(`/api/opportunities/${encodeURIComponent(id)}`, {
+            method: 'PATCH', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({status: 'closed', version: versionOf(record)}),
+          });
+          if (response.ok) ok += 1; else failed.push(id);
+        } catch (error) { failed.push(id); }
+      }
+      // Report the real outcome: a partial failure must not read as success.
+      if (failed.length) showToast(`${ok} closed, ${failed.length} failed`, 'warning');
+      else showToast(`${ok} marked irrelevant`, 'success');
+      clearOpportunitySelection();
+      await loadDashboard();
+    }
+
     function renderOpportunities() {
       const rows = byId('opportunity-rows'); clear(rows);
       const query = byId('opportunity-search').value.trim().toLowerCase();
@@ -1086,16 +1232,38 @@
       state.pager.page = Math.min(Math.max(1, state.pager.page), pageCount);
       const startIndex = (state.pager.page - 1) * pageSize;
       renderPager(total, startIndex, Math.min(total, startIndex + pageSize), pageCount);
-      if (!visible.length) { const row = document.createElement('tr'); const cell = document.createElement('td'); cell.colSpan = 9; cell.append(emptyState('No opportunities match', 'Change the filters or clear the search.')); row.append(cell); rows.append(row); return; }
+      if (!visible.length) { const row = document.createElement('tr'); const cell = document.createElement('td'); cell.colSpan = 10; cell.append(emptyState('No opportunities match', 'Change the filters or clear the search.')); row.append(cell); rows.append(row); return; }
       visible.slice(startIndex, startIndex + pageSize).forEach(item => {
         const row = document.createElement('tr'); row.className = 'opp-row'; row.dataset.id = String(identifier(item));
         const openDetails = tab => { const id = identifier(item); if (typeof window.openDrawer === 'function') window.openDrawer(id, tab); else showToast('Details unavailable', 'warning'); };
+        // Selection checkbox: enables bulk actions over the filtered set.
+        const checkCell = document.createElement('td'); checkCell.className = 'opp-check';
+        const checkBox = document.createElement('input'); checkBox.type = 'checkbox';
+        checkBox.checked = selectedOpportunities.has(String(identifier(item)));
+        checkBox.setAttribute('aria-label', `Select ${String(valueOf(item, ['title', 'role'], 'this job'))}`);
+        checkBox.addEventListener('change', () => {
+          const key = String(identifier(item));
+          if (checkBox.checked) selectedOpportunities.add(key); else selectedOpportunities.delete(key);
+          renderBulkBar();
+        });
+        checkCell.append(checkBox); row.append(checkCell);
         // Job: title (opens details), company, compact chips
         const identity = document.createElement('td'); identity.className = 'opp-job';
         const titleText = String(valueOf(item, ['title', 'role'], 'Untitled role'));
         const titleBtn = titleLink(item, titleText, 'link-button primary', () => openDetails('description'));
         const companyBtn = text('button', valueOf(item, ['company', 'organization'], 'Company not provided'), 'link-button secondary'); companyBtn.type = 'button'; companyBtn.title = 'Open details'; companyBtn.addEventListener('click', () => openDetails('description'));
         identity.append(titleBtn, companyBtn);
+        // One-click jump to the source, without opening the drawer first.
+        const externalUrl = listingUrl(item);
+        if (externalUrl) {
+          const jump = document.createElement('a');
+          jump.className = 'opp-link-icon';
+          jump.href = externalUrl; jump.target = '_blank'; jump.rel = 'noopener noreferrer';
+          jump.title = 'Open original listing in a new tab';
+          jump.setAttribute('aria-label', `Open original listing for ${titleText}`);
+          jump.append(svgIcon('external'));
+          titleBtn.after(jump);
+        }
         const badges = document.createElement('div'); badges.className = 'opp-chips';
         badges.append(text('span', trackLabel(item), 'chip info'));
         const jobType = valueOf(item, ['job_type', 'employment_type']); if (jobType && String(jobType).replace(/_/g, ' ').toLowerCase() !== trackLabel(item).toLowerCase()) badges.append(text('span', String(jobType).replace(/_/g, ' '), 'chip info'));
@@ -1108,15 +1276,25 @@
         const locationText = String(valueOf(item, ['location', 'workplace'], 'Not provided')); const locationCell = text('td', locationText, 'opp-location'); locationCell.title = locationText; row.append(locationCell);
         // Posted (relative, exact date on hover)
         const posted = humanDate(item.publication_date, 'posted'); const postedCell = text('td', item.publication_date ? relativeDate(item.publication_date) : 'No date', posted.className || 'secondary'); postedCell.title = posted.label; row.append(postedCell);
-        // Fit: one chip (AI score when available, else heuristic fit) + priority underneath
+        // Fit + priority + eligibility as one compact badge row: these four numbers
+        // used to compete for attention as separate text nodes.
         const fitCell = document.createElement('td'); const fitInfo = trackerFit({llm_fit: item.llm_fit, fit_score: valueOf(item, ['fit_score', 'match_score', 'match'], null)});
-        const fitChip = text('span', fitInfo.label, fitInfo.value == null ? 'chip' : fitInfo.value >= 60 ? 'chip have' : fitInfo.value >= 40 ? 'chip mid' : 'chip'); fitChip.title = fitInfo.label.startsWith('AI') ? 'AI fit score (Groq), 0-100' : 'Heuristic fit score, 0-100'; fitCell.append(fitChip);
-        const priority = normalizeScore(valueOf(item, ['priority_score', 'score'])); if (priority != null) fitCell.append(text('div', `Priority ${priority}`, 'secondary small'));
+        const fitRow = document.createElement('div'); fitRow.className = 'badge-row';
+        const priority = normalizeScore(valueOf(item, ['priority_score', 'score']));
+        const fitValue = fitInfo.value == null ? null : normalizeScore(fitInfo.value);
+        const headline = fitValue == null ? (priority == null ? '--' : `${priority} Priority`) : `${fitValue} Fit`;
+        const hint = [
+          fitInfo.label.startsWith('AI') ? 'AI fit score (Groq), 0-100' : 'Heuristic fit score, 0-100',
+          priority == null ? null : `Priority ${priority}`,
+        ].filter(Boolean).join(' · ');
+        fitRow.append(badge(headline, fitTone(fitValue == null ? priority : fitValue), hint));
+        const elig = String(valueOf(item, ['eligibility_status'], 'unknown'));
+        if (elig && elig !== 'unknown') fitRow.append(badge(humanizeStatus(elig), elig === 'eligible' ? 'good' : elig === 'ineligible' ? 'warn' : 'neutral'));
+        fitCell.append(fitRow);
         row.append(fitCell);
         row.append(buildSemanticCell(item));
-        // Eligibility + freshness + confidence in one cell
-        const eligCell = document.createElement('td'); const elig = String(valueOf(item, ['eligibility_status'], 'unknown')); const fresh = String(valueOf(item, ['freshness_status'], 'unknown'));
-        eligCell.append(text('span', humanizeStatus(elig), elig === 'eligible' ? 'chip have' : elig === 'ineligible' ? 'chip missing' : 'chip'));
+        // Freshness + confidence stay as a quiet sub-label, not a competing chip.
+        const eligCell = document.createElement('td'); const fresh = String(valueOf(item, ['freshness_status'], 'unknown'));
         eligCell.append(text('div', `${humanizeStatus(fresh)}, ${valueOf(item, ['verification_confidence'], 0)}% confidence`, 'secondary small'));
         row.append(eligCell);
         // CV: link when it exists, otherwise a shortcut to the CV tab
@@ -1128,11 +1306,11 @@
         const statusCell = document.createElement('td'); statusCell.className = 'opp-status';
         const currentStatus = String(valueOf(item, ['status', 'state'], 'discovered'));
         const appliedOn = String(valueOf(item, ['applied_at'], '') || '').slice(0, 10);
-        const badge = document.createElement('div'); badge.className = `apply-badge ${currentStatus === 'user_applied' ? 'is-applied' : currentStatus === 'closed' ? 'is-closed' : 'is-open'}`;
-        badge.append(svgIcon(currentStatus === 'user_applied' ? 'check' : currentStatus === 'closed' ? 'no' : 'clock'));
+        const applyBadge = document.createElement('div'); applyBadge.className = `apply-badge ${currentStatus === 'user_applied' ? 'is-applied' : currentStatus === 'closed' ? 'is-closed' : 'is-open'}`;
+        applyBadge.append(svgIcon(currentStatus === 'user_applied' ? 'check' : currentStatus === 'closed' ? 'no' : 'clock'));
         const badgeLabel = currentStatus === 'user_applied' ? (appliedOn ? `Applied ${formatShortDate(appliedOn)}` : 'Applied') : currentStatus === 'closed' ? 'Closed' : 'Not applied';
-        badge.append(text('span', badgeLabel));
-        badge.title = currentStatus === 'user_applied' ? (appliedOn ? `You applied on ${appliedOn}` : 'You applied to this job') : currentStatus === 'closed' ? 'Closed' : 'You have not applied to this job yet';
+        applyBadge.append(text('span', badgeLabel));
+        applyBadge.title = currentStatus === 'user_applied' ? (appliedOn ? `You applied on ${appliedOn}` : 'You applied to this job') : currentStatus === 'closed' ? 'Closed' : 'You have not applied to this job yet';
         const feedback = document.createElement('div'); feedback.className = 'status-line';
         const select = buildStatusSelect(item, 'opportunity'); select.className = 'stage-select';
         select.addEventListener('change', () => saveOpportunityStatus(item, select, feedback));
@@ -1142,7 +1320,7 @@
         // Actions: one compact row
         const detailCell = document.createElement('td'); const actions = document.createElement('div'); actions.className = 'opp-actions';
         const jdRow = document.createElement('tr'); jdRow.className = 'jd-row'; jdRow.hidden = true;
-        const jdCell = document.createElement('td'); jdCell.colSpan = 9; const jdPanel = document.createElement('pre'); jdPanel.className = 'jd-panel'; const jdMeta = document.createElement('div'); jdMeta.className = 'secondary'; jdCell.append(jdMeta, jdPanel); jdRow.append(jdCell);
+        const jdCell = document.createElement('td'); jdCell.colSpan = 10; const jdPanel = document.createElement('pre'); jdPanel.className = 'jd-panel'; const jdMeta = document.createElement('div'); jdMeta.className = 'secondary'; jdCell.append(jdMeta, jdPanel); jdRow.append(jdCell);
         const detailsBtn = text('button', 'Details', 'compact-button'); detailsBtn.type = 'button'; detailsBtn.addEventListener('click', () => openDetails());
         const toggle = text('button', 'Description', 'compact-button'); toggle.type = 'button'; toggle.setAttribute('aria-expanded', 'false');
         toggle.addEventListener('click', () => toggleDescription(item, toggle, jdRow, jdPanel, jdMeta));
@@ -1784,16 +1962,112 @@
       select.addEventListener('change', () => { if (select.value) saveDraftStatus(record, select, feedback); }); return select;
     }
 
-    function renderDrafts() {
-      const grid = byId('draft-grid'); clear(grid);
+    // Drafts are read one at a time, so the page is shaped like an email client:
+    // a list rail on the left, the full draft on the right.
+    var selectedDraftId = null;
+
+    function draftBodyText(item) {
+      return String(valueOf(item, ['body', 'text', 'content'], 'No draft body provided.'));
+    }
+
+    function visibleDrafts() {
       const query = byId('draft-search').value.trim().toLowerCase();
-      const records = state.drafts.filter(item => {
+      return state.drafts.filter(item => {
         if (!query) return true;
         return [item.subject, item.label, item.recipient, item.target, item.contact_name].join(' ').toLowerCase().includes(query);
       });
+    }
+
+    // Unfilled {Company} placeholders must be obvious BEFORE the text is copied.
+    // textContent only: draft bodies are untrusted content.
+    function highlightPlaceholders(container, body) {
+      clear(container);
+      const pattern = /\{[^{}\r\n]{1,60}\}|\[[^\[\]\r\n]{1,60}\]/g;
+      let cursor = 0; let match; let count = 0;
+      while ((match = pattern.exec(body)) !== null) {
+        if (match.index > cursor) container.append(document.createTextNode(body.slice(cursor, match.index)));
+        const chip = text('mark', match[0], 'draft-placeholder');
+        chip.title = 'Unfilled placeholder: replace this before you use the draft';
+        container.append(chip);
+        cursor = match.index + match[0].length; count += 1;
+      }
+      if (cursor < body.length) container.append(document.createTextNode(body.slice(cursor)));
+      return count;
+    }
+
+    function renderDrafts() {
+      const list = byId('draft-list'); clear(list);
+      const records = visibleDrafts();
       byId('draft-count').textContent = `${records.length} visible`;
-      if (!records.length) { empty(grid, query ? 'No drafts match this search.' : 'No drafts are available.'); return; }
-      records.forEach(item => { const card = document.createElement('article'); card.className = 'panel card draft-card'; card.append(text('h3', valueOf(item, ['subject', 'label'], 'Untitled draft')), text('div', `For ${valueOf(item, ['recipient', 'target', 'contact_name'], 'unverified recipient')}`, 'secondary'), text('p', valueOf(item, ['body', 'text', 'content'], 'No draft body provided.'), 'draft-copy'), text('div', 'Verify every recipient, claim, link, and attachment before manual use.', 'warning-copy')); const controls = document.createElement('div'); controls.className = 'draft-controls'; const fieldBox = document.createElement('label'); fieldBox.className = 'field'; fieldBox.append(text('span', 'Draft status', 'field-label')); const feedback = text('div', 'Select a new status to persist this tracking change.', 'status-line'); fieldBox.append(draftStatusSelect(item, feedback), feedback); const copy = text('button', 'Copy draft', 'compact-button'); copy.type = 'button'; copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(String(valueOf(item, ['body', 'text', 'content']))); copy.textContent = 'Copied'; announce('Draft copied for manual review.'); window.setTimeout(() => { copy.textContent = 'Copy draft'; }, 1400); } catch (_error) { feedback.className = 'status-line error'; feedback.textContent = 'Clipboard unavailable; select the text manually.'; } }); controls.append(fieldBox, copy); card.append(controls); grid.append(card); });
+      if (!records.length) {
+        empty(list, byId('draft-search').value.trim() ? 'No drafts match this search.' : 'No drafts are available.');
+        clear(byId('draft-detail')); empty(byId('draft-detail'), 'Select a draft to read it.');
+        return;
+      }
+      if (!records.some(item => String(identifier(item)) === String(selectedDraftId))) selectedDraftId = identifier(records[0]);
+      records.forEach(item => {
+        const id = String(identifier(item));
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'draft-row' + (id === String(selectedDraftId) ? ' is-active' : '');
+        row.setAttribute('aria-current', id === String(selectedDraftId) ? 'true' : 'false');
+        row.append(text('span', valueOf(item, ['subject', 'label'], 'Untitled draft'), 'draft-row-subject'));
+        row.append(text('span', valueOf(item, ['recipient', 'target', 'contact_name'], 'unverified recipient'), 'draft-row-to'));
+        const snippet = draftBodyText(item).replace(/\s+/g, ' ').slice(0, 90);
+        row.append(text('span', snippet, 'draft-row-snippet'));
+        const status = String(valueOf(item, ['status'], 'draft') || 'draft');
+        row.append(badge(humanizeStatus(status), status === 'sent_by_user' ? 'good' : 'neutral'));
+        row.addEventListener('click', () => { selectedDraftId = identifier(item); renderDrafts(); });
+        list.append(row);
+      });
+      renderDraftDetail();
+    }
+
+    function renderDraftDetail() {
+      const pane = byId('draft-detail'); clear(pane);
+      const item = (state.drafts || []).find(entry => String(identifier(entry)) === String(selectedDraftId));
+      if (!item) { empty(pane, 'Select a draft to read it.'); return; }
+      pane.append(text('h3', valueOf(item, ['subject', 'label'], 'Untitled draft')));
+      pane.append(text('div', `For ${valueOf(item, ['recipient', 'target', 'contact_name'], 'unverified recipient')}`, 'secondary'));
+      const target = valueOf(item, ['target', 'opportunity_title']);
+      if (target) pane.append(text('div', String(target), 'secondary'));
+
+      const body = draftBodyText(item);
+      const prose = document.createElement('pre'); prose.className = 'draft-body';
+      const placeholders = highlightPlaceholders(prose, body);
+      pane.append(prose);
+      if (placeholders) pane.append(text('div', `${placeholders} placeholder${placeholders === 1 ? '' : 's'} still to fill in.`, 'warning-copy'));
+      pane.append(text('div', 'Verify every recipient, claim, link, and attachment before manual use.', 'warning-copy'));
+
+      const controls = document.createElement('div'); controls.className = 'draft-controls';
+      const fieldBox = document.createElement('label'); fieldBox.className = 'field';
+      fieldBox.append(text('span', 'Draft status', 'field-label'));
+      const feedback = text('div', 'Select a new status to persist this tracking change.', 'status-line');
+      fieldBox.append(draftStatusSelect(item, feedback), feedback);
+      const copy = text('button', 'Copy draft', 'compact-button');
+      copy.type = 'button';
+      copy.addEventListener('click', () => copyDraftBody(item, copy, feedback));
+      controls.append(fieldBox, copy);
+      pane.append(controls);
+    }
+
+    // Copying is not sending. This deliberately does NOT advance the draft to
+    // sent_by_user: only the user knows whether they actually sent it, and
+    // writing a false "sent" into the tracker would be worse than no status.
+    function copyDraftBody(item, button, feedback) {
+      const body = draftBodyText(item);
+      const done = () => {
+        button.textContent = 'Copied';
+        announce('Draft copied for manual review. Status unchanged; set it yourself once you send.');
+        window.setTimeout(() => { button.textContent = 'Copy draft'; }, 1400);
+      };
+      const fail = () => {
+        feedback.className = 'status-line error';
+        feedback.textContent = 'Clipboard unavailable; select the text manually.';
+      };
+      try {
+        navigator.clipboard.writeText(body).then(done, fail);
+      } catch (_error) { fail(); }
     }
 
     function saveDraftStatus(record, select, feedback) {
@@ -1823,7 +2097,7 @@
       const requests = [
         ['summary', '/api/summary'], ['opportunities', '/api/opportunities'], ['contacts', '/api/contacts'], ['drafts', '/api/drafts'], ['funnel', '/api/funnel'], ['cvs', '/api/cvs']
       ];
-      skeletonRows(byId('opportunity-rows'), 15); skeletonCards(byId('cv-grid')); skeletonCards(byId('contact-grid')); skeletonCards(byId('draft-grid'));
+      skeletonRows(byId('opportunity-rows'), 15); skeletonCards(byId('cv-grid')); skeletonCards(byId('contact-grid')); skeletonCards(byId('draft-list'));
       const results = await Promise.allSettled(requests.map(([, url]) => getJson(url)));
       let failures = 0;
       results.forEach((result, index) => {
@@ -1888,9 +2162,11 @@
       const svg = document.createElementNS(ns, 'svg');
       svg.setAttribute('viewBox', '0 0 16 16'); svg.setAttribute('width', '14'); svg.setAttribute('height', '14');
       svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false');
-      svg.classList.add(kind === 'check' ? 'svg-ok' : kind === 'clock' ? 'svg-muted' : 'svg-no');
+      if (kind === 'check') svg.classList.add('svg-ok');
+      else if (kind === 'clock') svg.classList.add('svg-muted');
+      else if (kind !== 'external') svg.classList.add('svg-no');
       const path = document.createElementNS(ns, 'path');
-      const shapes = {check: 'M2.5 8.5l3.5 3.5 7.5-8', clock: 'M8 1.8a6.2 6.2 0 100 12.4A6.2 6.2 0 008 1.8zM8 4.6V8l2.4 1.6'};
+      const shapes = {check: 'M2.5 8.5l3.5 3.5 7.5-8', clock: 'M8 1.8a6.2 6.2 0 100 12.4A6.2 6.2 0 008 1.8zM8 4.6V8l2.4 1.6', external: 'M6.5 3.5h-3v9h9v-3M9.5 2.5h4v4M13.5 2.5l-6 6'};
       path.setAttribute('d', shapes[kind] || 'M3.5 3.5l9 9M12.5 3.5l-9 9');
       path.setAttribute('fill', 'none'); path.setAttribute('stroke', 'currentColor'); path.setAttribute('stroke-width', '2'); path.setAttribute('stroke-linecap', 'round');
       svg.append(path);
@@ -1925,11 +2201,26 @@
       const listingNode = byId('drawer-listing'); clear(listingNode); if (record && listingUrl(record)) { addSafeLink(listingNode, listingUrl(record), 'Open job listing'); listingNode.append(document.createTextNode(' '), text('span', 'You apply there yourself; nothing is submitted from here.', 'secondary')); }
       renderDrawerTabs();
       drawer.hidden = false;
+      const backdrop = byId('drawer-backdrop');
+      if (backdrop) backdrop.hidden = false;
+      // Remember where focus came from so closing returns it, rather than
+      // dropping keyboard users at the top of the document.
+      drawerState.returnFocus = document.activeElement;
       byId('drawer-close').focus();
       renderDrawerTab();
     };
 
-    function closeDrawer() { const drawer = byId('drawer'); if (!drawer.hidden) { drawer.hidden = true; announce('Details closed.'); } }
+    function closeDrawer() {
+      const drawer = byId('drawer');
+      if (drawer.hidden) return;
+      drawer.hidden = true;
+      const backdrop = byId('drawer-backdrop');
+      if (backdrop) backdrop.hidden = true;
+      announce('Details closed.');
+      const target = drawerState.returnFocus;
+      drawerState.returnFocus = null;
+      if (target && document.contains(target) && typeof target.focus === 'function') target.focus();
+    }
 
     function renderDrawerTabs() {
       const tabs = byId('drawer-tabs'); clear(tabs);
@@ -2396,6 +2687,17 @@
     }
 
     byId('drawer-close').addEventListener('click', closeDrawer);
+    byId('drawer-backdrop').addEventListener('click', closeDrawer);
+    byId('opp-select-all').addEventListener('change', event => {
+      const boxes = document.querySelectorAll('.opp-table tbody .opp-check input');
+      boxes.forEach(box => {
+        if (box.checked !== event.target.checked) { box.checked = event.target.checked; box.dispatchEvent(new Event('change')); }
+      });
+      renderBulkBar();
+    });
+    byId('opp-bulk-close').addEventListener('click', bulkCloseSelected);
+    byId('opp-bulk-export').addEventListener('click', exportSelectedOpportunities);
+    byId('opp-bulk-clear').addEventListener('click', clearOpportunitySelection);
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closeDrawer(); });
 
     // ---- Tracker board ----
@@ -2615,6 +2917,164 @@
       if (subtitle) section.append(text('p', subtitle, 'secondary'));
       return section;
     }
+    // Charts are hand-rolled inline SVG. This app must work from file:// with no
+    // network, so a CDN charting library is not an option.
+    function svgEl(name, attrs) {
+      const node = document.createElementNS('http://www.w3.org/2000/svg', name);
+      Object.keys(attrs || {}).forEach(key => node.setAttribute(key, String(attrs[key])));
+      return node;
+    }
+
+    function chartFrame(width, height, label) {
+      const svg = svgEl('svg', {
+        viewBox: `0 0 ${width} ${height}`, width: '100%',
+        preserveAspectRatio: 'xMinYMin meet',
+        role: 'img', 'aria-label': label, class: 'chart',
+      });
+      const caption = svgEl('title', {});
+      caption.textContent = label;
+      svg.append(caption);
+      return svg;
+    }
+
+    // Horizontal funnel: bar length is the share of the widest stage, so drop-off
+    // is visible as shape rather than read out of a percentage.
+    function funnelChart(conversions, medians) {
+      const steps = (conversions || []).filter(step => step && step.from_count != null);
+      const wrap = box('chart-wrap');
+      if (!steps.length) { empty(wrap, 'No funnel data yet.'); return wrap; }
+
+      const rowH = 42, padL = 150, padR = 90, width = 720;
+      const height = steps.length * rowH + 16;
+      const max = Math.max(...steps.map(step => step.from_count), 1);
+      const barW = width - padL - padR;
+      const label = 'Funnel conversion between pipeline stages';
+      const svg = chartFrame(width, height, label);
+
+      steps.forEach((step, index) => {
+        const y = index * rowH + 8;
+        const fromW = Math.max(2, (step.from_count / max) * barW);
+        const toW = Math.max(2, (step.to_count / max) * barW);
+
+        const name = svgEl('text', {x: padL - 10, y: y + 20, 'text-anchor': 'end', class: 'chart-label'});
+        name.textContent = `${humanStatus(step.from)} to ${humanStatus(step.to)}`;
+        svg.append(name);
+
+        svg.append(svgEl('rect', {x: padL, y: y + 6, width: fromW, height: 20, rx: 5, class: 'funnel-base'}));
+        svg.append(svgEl('rect', {x: padL, y: y + 6, width: toW, height: 20, rx: 5, class: 'funnel-fill'}));
+
+        const median = medians && medians[step.from];
+        const value = svgEl('text', {x: padL + barW + 8, y: y + 21, class: 'chart-value'});
+        value.textContent = `${step.to_count}/${step.from_count} (${step.pct}%)`;
+        svg.append(value);
+
+        const tip = svgEl('title', {});
+        tip.textContent = `${step.to_count} of ${step.from_count} moved on (${step.pct}%)` +
+          (median != null ? `, median ${median} days in ${humanStatus(step.from)}` : '');
+        svg.append(tip);
+      });
+
+      wrap.append(svg);
+      return wrap;
+    }
+
+    // Weekly activity as a small-multiples heatmap: intensity encodes volume, so
+    // eight weeks of zeros read as empty rather than as a column of "0 / 0 / 0".
+    function weeklyHeatmap(series) {
+      const weeks = series || [];
+      const wrap = box('chart-wrap');
+      if (!weeks.length) { empty(wrap, 'No weekly activity yet.'); return wrap; }
+
+      const metrics = [['discovered', 'Discovered'], ['verified', 'Verified'], ['cvs_generated', 'CVs'], ['applied', 'Applied']];
+      const cell = 40, gap = 5, padL = 96, padT = 26;
+      const width = padL + weeks.length * (cell + gap);
+      const height = padT + metrics.length * (cell + gap) + 8;
+      const svg = chartFrame(width, height, 'Weekly pipeline activity over the last 8 ISO weeks');
+
+      const peak = Math.max(1, ...weeks.flatMap(week => metrics.map(([key]) => Number(week[key]) || 0)));
+
+      weeks.forEach((week, col) => {
+        const head = svgEl('text', {
+          x: padL + col * (cell + gap) + cell / 2, y: 16,
+          'text-anchor': 'middle', class: 'chart-axis',
+        });
+        head.textContent = String(week.week || '').replace(/^\d{4}-/, '');
+        svg.append(head);
+      });
+
+      metrics.forEach(([key, name], row) => {
+        const rowLabel = svgEl('text', {x: padL - 10, y: padT + row * (cell + gap) + cell / 2 + 4, 'text-anchor': 'end', class: 'chart-label'});
+        rowLabel.textContent = name;
+        svg.append(rowLabel);
+
+        weeks.forEach((week, col) => {
+          const value = Number(week[key]) || 0;
+          const rect = svgEl('rect', {
+            x: padL + col * (cell + gap), y: padT + row * (cell + gap),
+            width: cell, height: cell, rx: 6,
+            class: value ? 'heat-cell' : 'heat-cell is-empty',
+            'fill-opacity': value ? (0.18 + 0.82 * (value / peak)).toFixed(3) : 1,
+          });
+          const tip = svgEl('title', {});
+          tip.textContent = `${name}, week of ${week.week_start || week.week}: ${value}`;
+          rect.append(tip);
+          svg.append(rect);
+
+          if (value) {
+            const num = svgEl('text', {
+              x: padL + col * (cell + gap) + cell / 2, y: padT + row * (cell + gap) + cell / 2 + 4,
+              'text-anchor': 'middle', class: 'heat-value',
+            });
+            num.textContent = String(value);
+            svg.append(num);
+          }
+        });
+      });
+
+      wrap.append(svg);
+      return wrap;
+    }
+
+    // Scatter of local fit against the AI rubric. The diagonal is agreement;
+    // distance from it is what "r = 0.68" actually looks like.
+    function correlationPlot(detail) {
+      const pairs = (detail && detail.pairs) || [];
+      const wrap = box('chart-wrap');
+      if (!pairs.length) { empty(wrap, 'No paired scores yet.'); return wrap; }
+
+      const size = 260, pad = 34, span = size - pad * 2;
+      const svg = chartFrame(size, size, `Local fit against AI score for ${pairs.length} jobs, r = ${detail.pearson_r}`);
+      const at = value => pad + (Math.max(0, Math.min(100, Number(value) || 0)) / 100) * span;
+
+      svg.append(svgEl('rect', {x: pad, y: pad, width: span, height: span, class: 'plot-frame'}));
+      svg.append(svgEl('line', {x1: pad, y1: size - pad, x2: size - pad, y2: pad, class: 'plot-diagonal'}));
+
+      const xTitle = svgEl('text', {x: size / 2, y: size - 6, 'text-anchor': 'middle', class: 'chart-axis'});
+      xTitle.textContent = 'Local fit';
+      svg.append(xTitle);
+      const yTitle = svgEl('text', {x: 10, y: size / 2, 'text-anchor': 'middle', class: 'chart-axis', transform: `rotate(-90 10 ${size / 2})`});
+      yTitle.textContent = 'AI score';
+      svg.append(yTitle);
+
+      const threshold = Number(detail.threshold) || 25;
+      pairs.forEach(pair => {
+        const far = Math.abs(Number(pair.delta) || 0) >= threshold;
+        const dot = svgEl('circle', {
+          cx: at(pair.fit_score), cy: size - at(pair.llm_fit), r: far ? 4 : 3,
+          class: far ? 'plot-dot is-far' : 'plot-dot',
+        });
+        const tip = svgEl('title', {});
+        tip.textContent = `${pair.company}: ${pair.title} - local ${pair.fit_score} vs AI ${pair.llm_fit}`;
+        dot.append(tip);
+        svg.append(dot);
+      });
+
+      wrap.append(svg);
+      const caption = text('div', `${pairs.length} scored jobs. Points on the line agree; points below it are jobs the AI rated lower than the local match.`, 'secondary');
+      wrap.append(caption);
+      return wrap;
+    }
+
     function insightList(rows) {
       const list = document.createElement('ul'); list.className = 'insights-list';
       rows.forEach(([left, right]) => { const item = document.createElement('li'); item.append(text('span', left), text('span', right, 'secondary')); list.append(item); });
@@ -2631,18 +3091,14 @@
                   insightMetric('Local vs AI score agreement', data.fit_vs_llm && data.fit_vs_llm.pearson_r != null ? `r = ${data.fit_vs_llm.pearson_r}` : 'Not enough data', `${(data.fit_vs_llm && data.fit_vs_llm.n) || 0} jobs scored by both`));
       root.append(grid);
 
-      const funnelSection = insightSection('Funnel', 'Conversion between stages and median days spent in each.');
-      funnelSection.append(insightList((funnel.conversions || []).map(step => {
-        const median = funnel.median_days_in_stage && funnel.median_days_in_stage[step.from];
-        return [`${humanStatus(step.from)} to ${humanStatus(step.to)}`, `${step.to_count}/${step.from_count} (${step.pct}%)${median != null ? `, median ${median} days` : ''}`];
-      })));
+      const funnelSection = insightSection('Funnel', 'Conversion between stages. Bar length is the share of the largest stage; hover a bar for median days.');
+      funnelSection.append(funnelChart(funnel.conversions, funnel.median_days_in_stage));
       root.append(funnelSection);
 
       const weekly = data.weekly || {};
-      const weeklySection = insightSection('Weekly activity', 'Last 8 ISO weeks: discovered / verified / CVs / applied.');
-      weeklySection.append(insightList((weekly.series || []).map(week => [week.week_start || week.week, `${week.discovered} / ${week.verified} / ${week.cvs_generated} / ${week.applied}`])));
+      const weeklySection = insightSection('Weekly activity', 'Last 8 ISO weeks. Darker means busier; empty cells are weeks with no activity.');
+      weeklySection.append(weeklyHeatmap(weekly.series));
       root.append(weeklySection);
-
       const gaps = (data.skills && data.skills.top_gaps) || [];
       const gapSection = insightSection('Top skill gaps', `Skills requested by ${(data.skills && data.skills.jobs_analyzed) || 0} jobs that are not in your evidence yet. Only add them to a CV once you have real proof.`);
       gapSection.append(insightList(gaps.slice(0, 10).map(skill => [skill.skill, `${skill.jobs_requesting} jobs (${skill.pct_of_jobs}%)`])));
@@ -2658,7 +3114,8 @@
       root.append(repostSection);
 
       const disagreements = (data.fit_vs_llm && data.fit_vs_llm.disagreements) || [];
-      const disagreeSection = insightSection('Scores to re-check', 'Local match and Groq rubric disagree by 25 points or more. Read the JD before trusting either.');
+      const disagreeSection = insightSection('Scores to re-check', 'Local match and Groq rubric disagree by 25 points or more. Read the JD before trusting either number.');
+      disagreeSection.append(correlationPlot(data.fit_vs_llm));
       disagreeSection.append(insightList(disagreements.slice(0, 10).map(pair => [`${pair.company}: ${pair.title}`, `fit ${pair.fit_score} vs AI ${pair.llm_fit}`])));
       root.append(disagreeSection);
     }
