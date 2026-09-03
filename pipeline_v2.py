@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import urllib.parse
 import sqlite3
 from contextlib import closing
 from datetime import datetime, timezone
@@ -207,6 +208,11 @@ CREATE TABLE IF NOT EXISTS recruiter_reviews (
     updated_at TEXT NOT NULL,
     UNIQUE(opportunity_id, cv_artifact_id)
 );
+-- The triage queue runs `WHERE status=? ORDER BY priority_score DESC` on every
+-- keypress, and the dashboard filters by source. Both were full table scans.
+CREATE INDEX IF NOT EXISTS opportunities_status_priority
+    ON opportunities(status, priority_score DESC);
+CREATE INDEX IF NOT EXISTS opportunities_source ON opportunities(source);
 CREATE TRIGGER IF NOT EXISTS opportunities_immutable_id BEFORE UPDATE OF id ON opportunities
 BEGIN SELECT RAISE(ABORT, 'immutable opportunity id'); END;
 CREATE TRIGGER IF NOT EXISTS contacts_immutable_id BEFORE UPDATE OF id ON contacts
@@ -485,6 +491,47 @@ def normalize_source(value: object) -> str:
     collapsed = re.sub(r"[\s_-]+", " ", text).strip()
     squashed = collapsed.replace(" ", "")
     return SOURCE_ALIASES.get(collapsed) or SOURCE_ALIASES.get(squashed) or collapsed
+
+
+# Hosts we can attribute with certainty. A company careers page is deliberately
+# absent: guessing a board from an arbitrary domain would invent provenance.
+KNOWN_JOB_HOSTS = {
+    "linkedin.com": "linkedin",
+    "weworkremotely.com": "weworkremotely",
+    "remoteok.com": "remoteok",
+    "remoteok.io": "remoteok",
+    "welcometothejungle.com": "welcometothejungle",
+    "indeed.com": "indeed",
+    "glassdoor.com": "glassdoor",
+    "wellfound.com": "wellfound",
+    "angel.co": "wellfound",
+    "greenhouse.io": "greenhouse",
+    "lever.co": "lever",
+    "jobright.ai": "jobright",
+}
+
+
+def source_from_url(url: object) -> str | None:
+    """Recover which board a listing came from, or None when it is not certain.
+
+    Twenty jobs were stored as source='unknown' while their URL was plainly a
+    linkedin.com job link, which understates where the pipeline actually finds
+    work. Returning None for unrecognised hosts keeps 'unknown' honest.
+    """
+    text = str(url or "").strip()
+    if not text:
+        return None
+    try:
+        host = urllib.parse.urlsplit(text).hostname or ""
+    except ValueError:
+        return None
+    host = host.casefold().removeprefix("www.")
+    if not host:
+        return None
+    for known, name in KNOWN_JOB_HOSTS.items():
+        if host == known or host.endswith("." + known):
+            return name
+    return None
 
 
 _DUPLICATE_NOISE = re.compile(

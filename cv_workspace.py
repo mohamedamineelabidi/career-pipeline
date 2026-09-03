@@ -170,11 +170,28 @@ def _load_builder(project_root: Path):
     return module.build_one, profile, module
 
 
+CV_GENERATION_STATUSES = frozenset({
+    "shortlisted", "eligible", "user_applied", "closed",
+})
+
+
+def may_generate_cv(status: object) -> bool:
+    """Whether a tailored CV should be built for a job in this status.
+
+    Tailoring is the most expensive step in the pipeline. Building it at discovery
+    meant 91 of 104 tailored PDFs (129 MB) were rendered for jobs that were never
+    triaged, while only 2 matched an actual application. Building at the moment of
+    choice spends that effort on jobs the user picked.
+    """
+    return str(status or "").strip() in CV_GENERATION_STATUSES
+
+
 def generate_cv(db_path, payload: dict, project_root: Path | None = None) -> dict:
     root = Path(project_root or PROJECT_ROOT).resolve()
     if not isinstance(payload, dict):
         raise ValidationError("JSON body must be an object")
-    unknown = set(payload) - {"opportunity_id", "job_description", "language", "version"}
+    unknown = set(payload) - {"opportunity_id", "job_description", "language",
+                              "version", "force"}
     if unknown:
         raise ValidationError("unknown generation fields: " + ", ".join(sorted(unknown)))
     opportunity_id = str(payload.get("opportunity_id") or "").strip()
@@ -201,6 +218,12 @@ def generate_cv(db_path, payload: dict, project_root: Path | None = None) -> dic
     row = dict(row)
     if version != row["updated_at"]:
         raise ConflictError("opportunity changed; reload before retrying")
+
+    if not payload.get("force") and not may_generate_cv(row["status"]):
+        raise ValidationError(
+            f"this job is {row['status']}, so no tailored CV was built: shortlist it "
+            "first, or pass force to build one anyway"
+        )
 
     try:
         source = json.loads(row.get("source_json") or "{}")

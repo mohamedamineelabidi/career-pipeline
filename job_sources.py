@@ -195,7 +195,13 @@ def map_job(record: dict, query: dict) -> dict | None:
     company = _clean(record.get("company") or record.get("company_name")) or "Unknown"
     location = _clean(record.get("location"))
     description = _clean(record.get("description"))
-    site = pipeline_v2.normalize_source(record.get("site") or "jobspy")
+    # Prefer what the URL proves over what the feed claims: records arrived with
+    # site missing while the link was plainly a known board.
+    site = pipeline_v2.normalize_source(
+        record.get("site")
+        or pipeline_v2.source_from_url(record.get("job_url") or record.get("url"))
+        or "jobspy"
+    )
     emails = record.get("emails")
     if isinstance(emails, str):
         emails = [part.strip() for part in emails.split(",") if part.strip()]
