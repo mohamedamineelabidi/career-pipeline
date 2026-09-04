@@ -177,3 +177,101 @@ def learn_pattern(observed: list[str], people: list[tuple[str, str]]) -> str | N
     if best_hits >= MIN_OBSERVATIONS and best_hits / len(pairs) >= MIN_AGREEMENT:
         return best
     return None
+
+
+# --- MX + SMTP verification -------------------------------------------------
+
+import secrets
+import smtplib
+import socket
+from dataclasses import dataclass
+
+SMTP_TIMEOUT_S = 10
+SMTP_PORT = 25
+
+
+@dataclass
+class Probe:
+    """What one SMTP conversation with one MX host said."""
+    connected: bool
+    rcpt_ok: bool
+    banner_rejected: bool = False   # the server sent a 5xx banner before EHLO
+
+
+@dataclass
+class Result:
+    mx_ok: bool
+    smtp_ok: bool
+    catch_all: bool
+    verdict: str   # accepted | rejected | unverifiable_catch_all | unverifiable_no_smtp | unverifiable_smtp_rejected
+
+
+def _mx_hosts(domain: str) -> list[str]:
+    """MX hosts by preference; empty when the domain has none or DNS fails."""
+    try:
+        import dns.resolver
+        answers = dns.resolver.resolve(domain, "MX", lifetime=SMTP_TIMEOUT_S)
+    except Exception:  # noqa: BLE001 - any DNS trouble means 'cannot verify'
+        return []
+    hosts = sorted((int(r.preference), str(r.exchange).rstrip(".")) for r in answers)
+    return [host for _, host in hosts if host]
+
+
+def _smtp_probe(host: str, addr: str, smtp_cls=smtplib.SMTP) -> Probe:
+    """Ask ``host`` whether it would accept ``addr`` as a recipient, then quit.
+    Nothing is sent. A 5xx banner before EHLO is recorded separately."""
+    try:
+        client = smtp_cls(host, SMTP_PORT, timeout=SMTP_TIMEOUT_S)
+    except (OSError, smtplib.SMTPException):
+        return Probe(False, False)
+    try:
+        code, _ = client.connect(host, SMTP_PORT)
+        if code >= 500:
+            return Probe(False, False, banner_rejected=True)
+        if code >= 400:
+            return Probe(False, False)
+        client.ehlo_or_helo_if_needed()
+        code, _ = client.mail("")
+        if code >= 400:
+            return Probe(True, False)
+        code, _ = client.rcpt(addr)
+        return Probe(True, 200 <= code < 300)
+    except (OSError, smtplib.SMTPException, socket.timeout):
+        return Probe(False, False)
+    finally:
+        try:
+            client.quit()
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def _random_local() -> str:
+    return secrets.token_hex(8)
+
+
+def verify_email(addr: str, mx_fn=None, probe_fn=None) -> Result:
+    """MX lookup then SMTP RCPT probe of ``addr`` and of a random local part on
+    the same domain (catch-all detection). Never trusts a catch-all."""
+    mx_fn = mx_fn or _mx_hosts
+    probe_fn = probe_fn or _smtp_probe
+    _, _, domain = (addr or "").lower().rpartition("@")
+    hosts = mx_fn(domain) if domain else []
+    if not hosts:
+        return Result(False, False, False, "unverifiable_no_smtp")
+    banner_rejected = False
+    for host in hosts:
+        probe = probe_fn(host, addr)
+        if probe.banner_rejected:
+            banner_rejected = True
+            continue
+        if not probe.connected:
+            continue
+        if not probe.rcpt_ok:
+            return Result(True, True, False, "rejected")
+        control = probe_fn(host, f"{_random_local()}@{domain}")
+        if control.connected and control.rcpt_ok:
+            return Result(True, True, True, "unverifiable_catch_all")
+        return Result(True, True, False, "accepted")
+    if banner_rejected:
+        return Result(True, False, False, "unverifiable_smtp_rejected")
+    return Result(True, False, False, "unverifiable_no_smtp")

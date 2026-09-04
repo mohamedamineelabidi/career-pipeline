@@ -107,5 +107,68 @@ class PatternTests(unittest.TestCase):
         self.assertEqual(ef.split_name("Cher"), ("Cher", ""))
 
 
+class VerifyEmailTests(unittest.TestCase):
+    def test_verify_reports_catch_all_and_does_not_trust_it(self):
+        r = ef.verify_email("kenza.akli@deloitte.com",
+                            mx_fn=lambda d: ["mx.deloitte.com"],
+                            probe_fn=lambda host, addr: ef.Probe(True, True))
+        self.assertTrue(r.mx_ok)
+        self.assertTrue(r.smtp_ok)
+        self.assertTrue(r.catch_all)
+        self.assertEqual(r.verdict, "unverifiable_catch_all")
+
+    def test_verify_accepted_and_rejected_by_rcpt(self):
+        probe = lambda host, addr: ef.Probe(True, addr.startswith("kenza"))  # noqa: E731
+        self.assertEqual(ef.verify_email("kenza.akli@deloitte.com", mx_fn=lambda d: ["mx"], probe_fn=probe).verdict, "accepted")
+        r = ef.verify_email("nobody.zzz@deloitte.com", mx_fn=lambda d: ["mx"], probe_fn=probe)
+        self.assertEqual(r.verdict, "rejected")
+        self.assertFalse(r.catch_all)
+
+    def test_verify_no_mx_or_no_smtp_is_unverifiable(self):
+        r = ef.verify_email("a.b@nowhere.example", mx_fn=lambda d: [], probe_fn=lambda h, a: ef.Probe(True, True))
+        self.assertFalse(r.mx_ok)
+        self.assertEqual(r.verdict, "unverifiable_no_smtp")
+        r = ef.verify_email("a.b@deloitte.com", mx_fn=lambda d: ["mx"], probe_fn=lambda h, a: ef.Probe(False, False))
+        self.assertTrue(r.mx_ok)
+        self.assertFalse(r.smtp_ok)
+        self.assertEqual(r.verdict, "unverifiable_no_smtp")
+
+    def test_verify_banner_rejection_is_unverifiable_not_rejected(self):
+        # Measured: deloitte.com and orange.ma MX answer '554 ... rejected' before EHLO.
+        def probe(host, addr):
+            return ef.Probe(False, False, banner_rejected=True)
+        r = ef.verify_email("a.b@deloitte.com", mx_fn=lambda d: ["mx"], probe_fn=probe)
+        self.assertEqual(r.verdict, "unverifiable_smtp_rejected")
+
+    def test_smtp_probe_parses_5xx_banner_without_network(self):
+        class FakeSMTP:
+            def __init__(self, host, port, timeout):
+                self.host = host
+            def connect(self, host, port):
+                return 554, b"Your access to this mail system has been rejected"
+            def quit(self):
+                pass
+        p = ef._smtp_probe("mx", "a@b.com", smtp_cls=FakeSMTP)
+        self.assertTrue(p.banner_rejected)
+        self.assertFalse(p.connected)
+
+    def test_smtp_probe_accepts_rcpt_without_network(self):
+        class FakeSMTP:
+            def __init__(self, host, port, timeout):
+                pass
+            def connect(self, host, port):
+                return 220, b"ok"
+            def ehlo_or_helo_if_needed(self):
+                pass
+            def mail(self, sender):
+                return 250, b"ok"
+            def rcpt(self, addr):
+                return (250, b"ok") if addr.startswith("kenza") else (550, b"no such user")
+            def quit(self):
+                pass
+        self.assertTrue(ef._smtp_probe("mx", "kenza@b.com", smtp_cls=FakeSMTP).rcpt_ok)
+        self.assertFalse(ef._smtp_probe("mx", "x@b.com", smtp_cls=FakeSMTP).rcpt_ok)
+
+
 if __name__ == "__main__":
     unittest.main()
