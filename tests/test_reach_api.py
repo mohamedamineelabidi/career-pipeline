@@ -334,7 +334,7 @@ class ReachApiHttpTests(unittest.TestCase):
     def test_stage_runners_never_include_linkedin(self):
         import reach.api as reach_api
 
-        self.assertEqual(set(reach_api.STAGE_RUNNERS), {"radar", "people_public"})
+        self.assertEqual(set(reach_api.STAGE_RUNNERS), {"radar", "people_public", "emails"})
 
     def test_people_public_stage_uses_search_and_reader_channels(self):
         import reach.api as api
@@ -372,6 +372,49 @@ class ReachApiHttpTests(unittest.TestCase):
                 with self.assertRaises(RuntimeError) as ctx:
                     api._run_people_public_stage(db_path, {"target_id": "tgt_missing"})
         self.assertIn("mcporter", str(ctx.exception))
+
+    def test_emails_stage_counts_tiers_and_requires_target(self):
+        import reach.api as api
+        with tempfile.TemporaryDirectory() as directory:
+            db_path = make_db(directory)
+            connection = sqlite3.connect(str(db_path))
+            for col in ("email_status TEXT DEFAULT 'none'", "email_evidence_url TEXT", "email_checked_at TEXT"):
+                connection.execute(f"ALTER TABLE people_candidates ADD COLUMN {col}")
+            connection.execute("INSERT INTO target_companies (id, name, intent, priority, created_at, updated_at)"
+                               " VALUES ('tgt_1', 'Deloitte', 'internship', 90, 'x', 'x')")
+            for cid, name, score in (("pc_a", "A One", 10), ("pc_b", "B Two", 90), ("pc_c", "C Three", 50)):
+                connection.execute("INSERT INTO people_candidates (id, target_company_id, name, score, created_at, updated_at)"
+                                   " VALUES (?, 'tgt_1', ?, ?, 'x', 'x')", (cid, name, score))
+            connection.commit(); connection.close()
+            order = []
+            statuses = iter(["found_official", "inferred", "none"])
+
+            def fake_find(conn, cand, search_fn, read_fn, verify_fn):
+                order.append(cand["id"])
+                return {"email_status": next(statuses)}
+
+            with self.assertRaises(ValueError):
+                api._run_emails_stage(db_path, {})
+            with mock.patch.object(api, "_find_email", fake_find), mock.patch.object(api, "_sleep", lambda s: None):
+                result = api._run_emails_stage(db_path, {"target_id": "tgt_1"})
+        self.assertEqual(order, ["pc_b", "pc_c", "pc_a"])  # score desc
+        self.assertEqual(result["checked"], 3)
+        self.assertEqual(result["found_official"], 1)
+        self.assertEqual(result["inferred"], 1)
+        self.assertEqual(result["none"], 1)
+        self.assertEqual(result["found_public"], 0)
+        self.assertEqual(result["rejected"], 0)
+
+    def test_emails_run_is_accepted_over_http(self):
+        import reach.api as reach_api
+        with tempfile.TemporaryDirectory() as directory:
+            db_path, base = self.start_server(directory)
+            with unittest.mock.patch.dict(reach_api.STAGE_RUNNERS, {"emails": lambda db, p: {"checked": 0}}, clear=False):
+                code, _ = self.request_error(base, "/api/reach/run", "POST", {"stage": "emails"})
+                self.assertEqual(code, 400)
+                status, body = self.request_json(base, "/api/reach/run", "POST", {"stage": "emails", "target_id": "tgt_1"})
+                self.assertEqual(status, 202)
+                self.assertTrue(body["run_id"])
 
 
 if __name__ == "__main__":

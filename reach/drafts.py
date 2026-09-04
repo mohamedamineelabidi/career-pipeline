@@ -207,6 +207,150 @@ def _kind(opportunity: dict | None) -> str:
     return "job"
 
 
+# --- compose: persona x channel x lang -------------------------------------
+
+KINDS = ("internship", "job")
+_SECTOR_TAGS = {
+    "telecom": ("telecom", "orange", "inwi", "maroc telecom", "network", "réseau", "reseau"),
+    "cloud": ("cloud", "gcp", "azure", "aws", "devops"),
+    "genai": ("data", "ai", "ia", "intelligence", "machine learning", "ml", "genai", "llm", "analytics"),
+    "recruiting": ("recrut", "recruit", "talent", "rh", "hr", "people"),
+}
+_MANAGER_PROOF = {"telecom": "netix", "cloud": "upfund", "genai": "arya", "recruiting": "arya"}
+_RECRUITER_PROOF = {"telecom": "netix", "cloud": "upfund", "genai": "arya", "recruiting": "arya"}
+
+
+def _proof_by_id(sheet: dict, proof_id: str) -> dict:
+    return next(p for p in sheet["proofs"] if p["id"] == proof_id)
+
+
+def _sector_of(text: str) -> str | None:
+    padded = f" {text.lower()} "
+    for sector, words in _SECTOR_TAGS.items():
+        if any((f" {w} " in padded) or (len(w) > 4 and f" {w}" in padded) for w in words):
+            return sector
+    return None
+
+
+def _choose_proof(persona_name: str, person: dict, company: str) -> str:
+    headline = " ".join(str(person.get("headline") or "").split())
+    # Judge the function, not the employer: "Head of Data @ Orange" is a data role.
+    headline = " ".join(_split_role_company(seg)[0] for seg in re.split(r"\s*[|,]\s*", headline))
+    if persona_name == "recruiter":
+        sector = _sector_of(f"{company} {person.get('target_sector') or ''}")
+        return _RECRUITER_PROOF.get(sector or "", "arya")
+    if persona_name == "manager":
+        sector = _sector_of(f"{headline} {person.get('role_seen') or ''}") or _sector_of(company)
+        return _MANAGER_PROOF.get(sector or "", "arya")
+    if persona_name == "alumni":
+        return "netix" if _sector_of(company) == "telecom" else "club"
+    if persona_name == "senior":
+        return "upfund"
+    sector = _sector_of(f"{headline} {person.get('role_seen') or ''}") or _sector_of(company)
+    return _MANAGER_PROOF.get(sector or "", "arya")
+
+
+def _topic(person: dict, lang: str) -> str:
+    text = f"{person.get('headline') or ''} {person.get('role_seen') or ''}"
+    sector = _sector_of(text)
+    if sector == "telecom":
+        return "le réseau" if lang == "fr" else "network"
+    if sector == "cloud":
+        return "le cloud" if lang == "fr" else "cloud"
+    return "la data et l'IA" if lang == "fr" else "data and AI"
+
+
+def _ask(persona_name: str, lang: str, company: str, person: dict, short: bool) -> str:
+    fr = lang == "fr"
+    if persona_name == "recruiter":
+        if short:
+            return ("Y a-t-il un recrutement de stagiaires PFE cette année chez vous ?" if fr
+                    else "Is there a PFE intern intake this year on your side?")
+        return (f"Y a-t-il un recrutement de stagiaires PFE cette année chez {company}, et qui pilote ce sujet ?" if fr
+                else f"Is there a PFE intern intake this year at {company}, and who owns it?")
+    if persona_name == "manager":
+        return ("Un échange de 15 minutes aurait-il du sens pour vous ?" if fr
+                else "Would a 15-minute call make sense for you?")
+    if persona_name == "alumni":
+        return (f"Comment avez-vous abordé le PFE chez {company} ?" if fr
+                else f"How did you approach the PFE at {company}?")
+    if persona_name == "senior":
+        return ("Qui dans votre équipe serait la bonne personne pour ce sujet ?" if fr
+                else "Who on your team would be the right person for this?")
+    topic = _topic(person, lang)
+    return (f"Comment l'équipe travaille-t-elle sur {topic} chez {company} ?" if fr
+            else f"How is the team at {company} working on {topic}?")
+
+
+def _subject(lang: str, kind: str, company: str) -> str:
+    if lang == "fr":
+        subject = f"Stage PFE 2027 IA / data chez {company}" if kind == "internship" else f"Premier poste IA / data chez {company}"
+    else:
+        subject = f"PFE internship 2027, AI and data, {company}" if kind == "internship" else f"First AI / data role, {company}"
+    if len(subject) > SUBJECT_MAX:
+        subject = subject[:SUBJECT_MAX].rsplit(" ", 1)[0]
+    return subject
+
+
+def compose(person: dict, channel: str, lang: str, kind: str = "internship", company: str | None = None) -> dict:
+    """Build one outreach draft around the person: greeting, hook, who I am, one proof, one ask, close.
+
+    Returns {subject, body, persona, proof_id, lint}. subject is None off email.
+    """
+    if channel not in LIMITS:
+        raise ValueError(f"unknown channel {channel!r}; expected one of {CHANNELS}")
+    lang = str(lang).lower()
+    if lang not in ("fr", "en"):
+        raise ValueError("lang must be fr|en")
+    if kind not in KINDS:
+        raise ValueError("kind must be internship|job")
+    sheet = about_me()
+    fr = lang == "fr"
+    first = _first_name(person.get("name", ""))
+    company = (company or person.get("company_seen") or person.get("target_name") or "").strip()
+    if not company:
+        _, head_company = _split_role_company(str(person.get("headline") or "").split("|")[0].split(",")[0])
+        company = head_company or ("votre entreprise" if fr else "your company")
+    who = persona(person)
+    proof_id = _choose_proof(who, person, company)
+    proof = _proof_by_id(sheet, proof_id)[lang]
+    status = sheet["status_" + lang]
+    seeking = sheet["seeking"][kind][lang]
+    greeting = f"Bonjour {first}," if fr else f"Hi {first},"
+
+    if channel == "linkedin_note":
+        me = (f"Je suis {status} et je cherche un {seeking}." if fr
+              else f"I am a {status}, currently looking for a {seeking}.")
+        lines = [greeting, me, _ask(who, lang, company, person, short=True),
+                 "Merci, the candidate" if fr else "Thank you, the candidate"]
+        body = "\n".join(lines)
+        return {"subject": None, "body": body, "persona": who, "proof_id": proof_id,
+                "lint": lint(body, channel)}
+
+    hook_text = hook(person, lang, company=company)
+    paragraphs = [greeting]
+    if hook_text:
+        paragraphs.append(hook_text[0].upper() + hook_text[1:] + ".")
+    paragraphs.append(f"Je suis {status} et je cherche un {seeking}." if fr
+                      else f"I am a {status}, currently looking for a {seeking}.")
+    paragraphs.append(("Un point concret : " if fr else "One concrete point: ") + proof + ".")
+    paragraphs.append(_ask(who, lang, company, person, short=False))
+    subject = None
+    if channel == "email":
+        subject = _subject(lang, kind, company)
+        close = ["Merci pour votre temps," if fr else "Thank you for your time,", sheet["signature_" + lang]]
+        if sheet["links"].get("linkedin"):
+            close.append("LinkedIn: " + sheet["links"]["linkedin"])
+        if sheet["links"].get("github"):
+            close.append("GitHub: " + sheet["links"]["github"])
+        paragraphs.append("\n".join(close))
+    else:
+        paragraphs.append("Merci, the candidate" if fr else "Thank you, the candidate")
+    body = "\n\n".join(paragraphs)
+    return {"subject": subject, "body": body, "persona": who, "proof_id": proof_id,
+            "lint": lint(body, channel, subject)}
+
+
 def draft_for(contact: dict, opportunity: dict | None, lang: str, fact: str,
               channel: str = "linkedin") -> str:
     """Build a short, plain outreach message in 'fr' or 'en'."""

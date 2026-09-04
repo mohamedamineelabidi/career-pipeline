@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import threading
+import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any
@@ -364,9 +365,74 @@ def _run_people_public_stage(db_path, payload: dict[str, Any]) -> dict[str, Any]
     return {"target_id": target_id, "company": company, "inserted": len(inserted), "candidate_ids": inserted}
 
 
+def _find_email(conn, candidate, search_fn, read_fn, verify_fn) -> dict[str, Any]:
+    from reach import email_finder
+    return email_finder.find_email(conn, candidate, search_fn, read_fn, verify_fn,
+                                   company_search_fn=_company_search_fn)
+
+
+def _company_search_fn(query: str) -> list[dict[str, Any]]:
+    from reach.search_channel import exa_search
+    return exa_search(query, category="company", num_results=5)
+
+
+def _email_search_fn(query: str, category: str | None = None) -> list[dict[str, Any]]:
+    from reach.search_channel import exa_search
+    return exa_search(query, category=category, num_results=10)
+
+
+def _verify_email(addr: str):
+    from reach import email_finder
+    return email_finder.verify_email(addr)
+
+
+def _sleep(seconds: float) -> None:
+    time.sleep(seconds)
+
+
+EMAILS_PACING_S = 1.5
+EMAILS_MAX_CANDIDATES = 60
+EMAIL_TIERS = ("found_official", "found_public", "inferred", "rejected", "none")
+
+
+def _run_emails_stage(db_path, payload: dict[str, Any]) -> dict[str, Any]:
+    """Find emails for ONE target's candidates: evidence on a page first, then a
+    pattern observed at the company, and record which tier each address came from.
+    Nothing is sent; the SMTP probe only asks and quits."""
+    target_id = str(payload.get("target_id") or "").strip()
+    if not target_id:
+        raise ValueError("emails needs a target_id")
+    connection = pipeline_v2.connect(db_path)
+    try:
+        row = connection.execute("SELECT name FROM target_companies WHERE id = ?", (target_id,)).fetchone()
+        if row is None:
+            raise ValueError(f"unknown target {target_id}")
+        company = row[0]
+        candidates = _rows(connection.execute(
+            "SELECT * FROM people_candidates WHERE target_company_id = ?"
+            " ORDER BY score DESC, created_at ASC LIMIT ?", (target_id, EMAILS_MAX_CANDIDATES)))
+
+        def read_fn(url: str) -> dict[str, str]:
+            text, backend = _read_url(url)
+            return {"text": text, "backend": backend}
+
+        counts = {tier: 0 for tier in EMAIL_TIERS}
+        for index, candidate in enumerate(candidates):
+            if index:
+                _sleep(EMAILS_PACING_S)
+            result = _find_email(connection, candidate, _email_search_fn, read_fn, _verify_email)
+            connection.commit()
+            status = str(result.get("email_status") or "none")
+            counts[status] = counts.get(status, 0) + 1
+    finally:
+        connection.close()
+    return {"target_id": target_id, "company": company, "checked": len(candidates), **counts}
+
+
 STAGE_RUNNERS: dict[str, Any] = {
     "radar": _run_radar_stage,
     "people_public": _run_people_public_stage,
+    "emails": _run_emails_stage,
 }
 
 
@@ -393,7 +459,9 @@ def _execute_run(db_path, run_id: str, stage: str, payload: dict[str, Any]) -> N
 def start_run(db_path, payload: dict[str, Any]) -> tuple[int, dict[str, Any]]:
     stage = str(payload.get("stage") or "").strip()
     if stage not in STAGE_RUNNERS:
-        raise ValidationError("stage must be one of radar|people_public")
+        raise ValidationError("stage must be one of radar|people_public|emails")
+    if stage in ("people_public", "emails") and not str(payload.get("target_id") or "").strip():
+        raise ValidationError(f"{stage} needs a target_id")
     run_type = f"reach_{stage}"
     connection = pipeline_v2.connect(db_path)
     try:

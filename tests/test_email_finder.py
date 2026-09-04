@@ -170,5 +170,102 @@ class VerifyEmailTests(unittest.TestCase):
         self.assertFalse(ef._smtp_probe("mx", "x@b.com", smtp_cls=FakeSMTP).rcpt_ok)
 
 
+def _seed_candidate(conn, cid, name, company="Deloitte"):
+    conn.execute(
+        "INSERT INTO people_candidates (id, target_company_id, name, company_seen, score, created_at, updated_at)"
+        " VALUES (?, 'tgt_1', ?, ?, 50, 'x', 'x')", (cid, name, company))
+    return dict(conn.execute("SELECT * FROM people_candidates WHERE id = ?", (cid,)).fetchone())
+
+
+def _seed_lead(conn, cid, name, email, company="Deloitte"):
+    conn.execute("INSERT INTO contacts (id, name, company, role, source_json, created_at, updated_at)"
+                 " VALUES (?, ?, ?, '', '{}', 'x', 'x')", (cid, name, company))
+    conn.execute("INSERT INTO contact_routes (id, contact_id, route_type, value) VALUES (?, ?, 'email', ?)",
+                 ("r" + cid, cid, email))
+
+
+class FindEmailTests(unittest.TestCase):
+    def setUp(self):
+        self.conn = make_conn()
+        self.conn.execute("INSERT INTO target_companies (id, name, created_at, updated_at)"
+                          " VALUES ('tgt_1', 'Deloitte', 'x', 'x')")
+        _seed_lead(self.conn, "c1", "Hajar Ghzala", "hajar.ghzala@deloitte.com")
+        self.queries = []
+
+    def search(self, hits):
+        def fn(query, category=None):
+            self.assertNotIn("@", query)
+            self.queries.append((query, category))
+            return hits
+        return fn
+
+    def test_found_official_when_page_host_is_a_company_domain(self):
+        cand = _seed_candidate(self.conn, "pc_1", "Kenza Akli")
+        hits = [{"url": "https://www.linkedin.com/in/kenza", "title": "", "snippet": ""},
+                {"url": "https://www2.deloitte.com/ma/fr/team.html", "title": "", "snippet": ""}]
+        reads = []
+        def read(url):
+            reads.append(url)
+            return {"text": "Kenza Akli, kenza.akli@deloitte.com", "status": "ok"}
+        out = ef.find_email(self.conn, cand, search_fn=self.search(hits), read_fn=read,
+                            verify_fn=lambda a: self.fail("no verify for found"))
+        self.assertEqual(out["email_status"], "found_official")
+        self.assertEqual(reads, ["https://www2.deloitte.com/ma/fr/team.html"])  # linkedin never read
+        self.assertEqual(self.queries[0], ('"Kenza Akli" Deloitte', "people"))
+        row = dict(self.conn.execute("SELECT * FROM people_candidates WHERE id='pc_1'").fetchone())
+        self.assertEqual(row["email"], "kenza.akli@deloitte.com")
+        self.assertEqual(row["email_status"], "found_official")
+        self.assertEqual(row["email_evidence_url"], "https://www2.deloitte.com/ma/fr/team.html")
+        self.assertEqual(row["verification_status"], "official_company_public")
+        self.assertTrue(row["email_checked_at"])
+
+    def test_found_public_when_page_host_is_elsewhere(self):
+        cand = _seed_candidate(self.conn, "pc_2", "Kenza Akli")
+        hits = [{"url": "https://conference.example.org/speakers", "title": "", "snippet": ""}]
+        out = ef.find_email(self.conn, cand, search_fn=self.search(hits),
+                            read_fn=lambda u: {"text": "speaker: kenza.akli@deloitte.com"},
+                            verify_fn=lambda a: None)
+        self.assertEqual(out["email_status"], "found_public")
+        row = dict(self.conn.execute("SELECT * FROM people_candidates WHERE id='pc_2'").fetchone())
+        self.assertEqual(row["verification_status"], "professional_public")
+        self.assertEqual(row["email_evidence_url"], "https://conference.example.org/speakers")
+
+    def test_inferred_from_learned_pattern_when_probe_is_unverifiable(self):
+        _seed_lead(self.conn, "c2", "Omar Benani", "omar.benani@deloitte.com")
+        cand = _seed_candidate(self.conn, "pc_3", "Kenza Akli")
+        verified = []
+        def verify(addr):
+            verified.append(addr)
+            return ef.Result(True, False, False, "unverifiable_smtp_rejected")
+        out = ef.find_email(self.conn, cand, search_fn=self.search([]), read_fn=lambda u: {"text": ""},
+                            verify_fn=verify)
+        self.assertEqual(out["email_status"], "inferred")
+        self.assertEqual(verified, ["kenza.akli@deloitte.com"])
+        row = dict(self.conn.execute("SELECT * FROM people_candidates WHERE id='pc_3'").fetchone())
+        self.assertEqual(row["email"], "kenza.akli@deloitte.com")
+        self.assertEqual(row["email_status"], "inferred")
+        self.assertEqual(row["verification_status"], "unverified")
+        self.assertEqual(self.queries, [('"Kenza Akli" Deloitte', "people"), ('"Kenza Akli" Deloitte', None)])
+
+    def test_rejected_when_probe_refuses_the_pattern_address(self):
+        _seed_lead(self.conn, "c2", "Omar Benani", "omar.benani@deloitte.com")
+        cand = _seed_candidate(self.conn, "pc_4", "Kenza Akli")
+        out = ef.find_email(self.conn, cand, search_fn=self.search([]), read_fn=lambda u: {"text": ""},
+                            verify_fn=lambda a: ef.Result(True, True, False, "rejected"))
+        self.assertEqual(out["email_status"], "rejected")
+        row = dict(self.conn.execute("SELECT * FROM people_candidates WHERE id='pc_4'").fetchone())
+        self.assertEqual(row["email"] or "", "")
+        self.assertEqual(row["email_status"], "rejected")
+
+    def test_none_when_only_one_observation_exists(self):
+        cand = _seed_candidate(self.conn, "pc_5", "Kenza Akli")
+        out = ef.find_email(self.conn, cand, search_fn=self.search([]), read_fn=lambda u: {"text": ""},
+                            verify_fn=lambda a: self.fail("one observation is not a pattern"))
+        self.assertEqual(out["email_status"], "none")
+        row = dict(self.conn.execute("SELECT * FROM people_candidates WHERE id='pc_5'").fetchone())
+        self.assertEqual(row["email_status"], "none")
+        self.assertTrue(row["email_checked_at"])
+
+
 if __name__ == "__main__":
     unittest.main()

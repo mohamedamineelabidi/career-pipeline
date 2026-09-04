@@ -154,6 +154,82 @@ class HookTests(unittest.TestCase):
             self.assertNotIn("—", text)
 
 
+PEOPLE = {
+    "recruiter": {"name": "Kenza Akli", "headline": "Deputy HR Director @ Deloitte | Talent Management",
+                  "role_seen": "Talent Acquisition", "company_seen": "Deloitte", "email": "k@deloitte.test"},
+    "manager": {"name": "Omar Idrissi", "headline": "Head of Data & AI @ Orange Maroc", "role_seen": "Data Manager",
+                "company_seen": "Orange Maroc"},
+    "senior": {"name": "Sara Bennani", "headline": "Partner @ EY", "role_seen": "Partner", "company_seen": "EY"},
+    "alumni": {"name": "Yassine Kadiri", "headline": "Consultant chez KPMG, ENSAH alumni", "company_seen": "KPMG"},
+    "peer": {"name": "Hajar Lamrani", "headline": "Data Engineer @ OCP", "role_seen": "Data Engineer",
+             "company_seen": "OCP"},
+}
+
+
+class ComposeTests(unittest.TestCase):
+    def test_every_persona_channel_lang_passes_lint(self):
+        sheet = drafts.about_me()
+        proof_texts = {lang: [p[lang] for p in sheet["proofs"]] for lang in ("fr", "en")}
+        for want, person in PEOPLE.items():
+            for channel in drafts.CHANNELS:
+                for lang in ("fr", "en"):
+                    with self.subTest(persona=want, channel=channel, lang=lang):
+                        out = drafts.compose(person, channel, lang)
+                        self.assertEqual(out["persona"], want)
+                        self.assertEqual(out["lint"], [])
+                        self.assertEqual(drafts.lint(out["body"], channel, out["subject"]), [])
+                        body = out["body"]
+                        self.assertTrue(body.startswith(("Bonjour " if lang == "fr" else "Hi ") + person["name"].split()[0] + ","))
+                        self.assertNotIn("!", body)
+                        self.assertLessEqual(len(body), drafts.LIMITS[channel])
+                        self.assertIn(out["proof_id"], [p["id"] for p in sheet["proofs"]])
+                        if channel == "linkedin_note":
+                            self.assertIsNone(out["subject"])
+                            self.assertTrue(body.endswith("Merci, the candidate" if lang == "fr" else "Thank you, the candidate"))
+                            self.assertEqual(sum(1 for t in proof_texts[lang] if t in body), 0)
+                        else:
+                            self.assertEqual(sum(1 for t in proof_texts[lang] if t in body), 1)
+                            self.assertIn(sheet["status_" + lang], body)
+                            self.assertIn(sheet["seeking"]["internship"][lang], body)
+                        if channel == "email":
+                            self.assertTrue(6 <= len(out["subject"]) <= 60, out["subject"])
+                            self.assertTrue(body.endswith(sheet["signature_" + lang] + "\nGitHub: " + sheet["links"]["github"]))
+                            self.assertNotIn("LinkedIn:", body)
+                        else:
+                            self.assertNotIn("github.com", body)
+                        self.assertEqual(body.count("the candidate"), 1)
+
+    def test_proof_and_ask_follow_persona(self):
+        self.assertEqual(drafts.compose(PEOPLE["recruiter"], "email", "fr")["proof_id"], "arya")
+        self.assertEqual(drafts.compose(PEOPLE["recruiter"], "email", "fr", company="Orange")["proof_id"], "netix")
+        self.assertEqual(drafts.compose(PEOPLE["manager"], "email", "fr")["proof_id"], "arya")
+        cloud = dict(PEOPLE["manager"], headline="Head of Cloud @ Orange Maroc")
+        self.assertEqual(drafts.compose(cloud, "email", "en")["proof_id"], "upfund")
+        telecom = dict(PEOPLE["manager"], headline="Network Manager @ Orange Maroc")
+        self.assertEqual(drafts.compose(telecom, "email", "en")["proof_id"], "netix")
+        self.assertEqual(drafts.compose(PEOPLE["senior"], "email", "en")["proof_id"], "upfund")
+        self.assertIn(drafts.compose(PEOPLE["alumni"], "email", "en")["proof_id"], ("club", "netix"))
+        self.assertIn("PFE", drafts.compose(PEOPLE["recruiter"], "linkedin_message", "en")["body"])
+        self.assertIn("15", drafts.compose(PEOPLE["manager"], "linkedin_message", "fr")["body"])
+        self.assertIn("KPMG", drafts.compose(PEOPLE["alumni"], "linkedin_message", "en")["body"])
+        self.assertIn("right person", drafts.compose(PEOPLE["senior"], "linkedin_message", "en")["body"])
+        self.assertIn("OCP", drafts.compose(PEOPLE["peer"], "linkedin_message", "en")["body"])
+
+    def test_job_kind_and_subject_and_hook_drop(self):
+        out = drafts.compose(PEOPLE["recruiter"], "email", "fr", kind="job")
+        self.assertIn("premier poste", out["body"])
+        self.assertIn("Deloitte", out["subject"])
+        en = drafts.compose(PEOPLE["senior"], "email", "en")
+        self.assertEqual(en["subject"], "PFE internship 2027, AI and data, EY")
+        bare = drafts.compose({"name": "Nadia"}, "linkedin_message", "en")
+        self.assertNotIn("I saw", bare["body"])
+        self.assertEqual(bare["lint"], [])
+        with self.assertRaises(ValueError):
+            drafts.compose(PEOPLE["peer"], "fax", "en")
+        with self.assertRaises(ValueError):
+            drafts.compose(PEOPLE["peer"], "email", "de")
+
+
 class SaveDraftTests(unittest.TestCase):
     def setUp(self):
         self._dir = tempfile.TemporaryDirectory()

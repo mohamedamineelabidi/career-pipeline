@@ -122,7 +122,8 @@ def company_domains(conn, company: str, search_fn) -> set[str]:
     if not (company or "").strip():
         return set()
     domains = _lead_domains(conn, company)
-    domains |= _official_site_domains(company, search_fn)
+    if search_fn is not None:
+        domains |= _official_site_domains(company, search_fn)
     return domains
 
 
@@ -275,3 +276,129 @@ def verify_email(addr: str, mx_fn=None, probe_fn=None) -> Result:
     if banner_rejected:
         return Result(True, False, False, "unverifiable_smtp_rejected")
     return Result(True, False, False, "unverifiable_no_smtp")
+
+
+# --- Orchestration: evidence first, pattern second, and record which -------
+
+from datetime import datetime, timezone
+from urllib.parse import urlparse
+
+MAX_PAGES_PER_PERSON = 5
+UNVERIFIABLE_PREFIX = "unverifiable_"
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _search_hits(search_fn, query: str) -> list[dict]:
+    """Exa 'people' category first, then the open web. Never an '@' in the query."""
+    hits: list[dict] = []
+    for category in ("people", None):
+        try:
+            hits.extend(search_fn(query, category) or [])
+        except TypeError:
+            hits.extend(search_fn(query) or [])
+        except Exception:  # noqa: BLE001 - one channel down is not a crash
+            continue
+    return hits
+
+
+def _page_text(read_fn, url: str) -> str:
+    try:
+        result = read_fn(url)
+    except Exception:  # noqa: BLE001
+        return ""
+    if isinstance(result, dict):
+        return str(result.get("text") or "")
+    if isinstance(result, tuple):
+        return str(result[0] or "")
+    return str(result or "")
+
+
+def _observed_at_company(conn, company: str) -> tuple[list[str], list[tuple[str, str]]]:
+    like = f"%{company.strip()}%"
+    rows = conn.execute(
+        "SELECT c.name, r.value FROM contact_routes r JOIN contacts c ON c.id = r.contact_id"
+        " WHERE r.route_type = 'email' AND c.company LIKE ? COLLATE NOCASE", (like,)
+    ).fetchall()
+    observed, people = [], []
+    for name, value in rows:
+        observed.append(str(value).lower())
+        people.append(split_name(str(name)))
+    return observed, people
+
+
+def _store(conn, candidate_id: str, *, email: str, email_status: str, evidence_url: str,
+           verification_status: str | None) -> None:
+    now = _now()
+    conn.execute(
+        "UPDATE people_candidates SET email = ?, email_status = ?, email_evidence_url = ?,"
+        " email_checked_at = ?, updated_at = ? WHERE id = ?",
+        (email, email_status, evidence_url, now, now, candidate_id),
+    )
+    if verification_status:
+        conn.execute("UPDATE people_candidates SET verification_status = ? WHERE id = ?",
+                     (verification_status, candidate_id))
+
+
+def find_email(conn, candidate: dict, search_fn, read_fn, verify_fn, company_search_fn=None) -> dict:
+    """Find one candidate's address. Returns {email, email_status, evidence_url, verdict}.
+
+    ``search_fn(query, category)`` is the people/web search; ``company_search_fn``
+    (optional, Exa 'company' category) adds the official-site domain to the
+    lead-observed domains.
+
+    1. Read on a page (found_official on a company domain, found_public elsewhere).
+    2. Learned pattern from >= 2 observed lead emails at the company, then an SMTP
+       probe: rejected -> 'rejected'; accepted or unverifiable -> 'inferred'.
+    3. Nothing observed -> 'none'.
+    """
+    candidate_id = str(candidate["id"])
+    name = str(candidate.get("name") or "").strip()
+    company = str(candidate.get("company_seen") or "").strip()
+    if not company and candidate.get("target_company_id"):
+        row = conn.execute("SELECT name FROM target_companies WHERE id = ?",
+                           (candidate["target_company_id"],)).fetchone()
+        company = str(row[0]) if row else ""
+    domains = company_domains(conn, company, search_fn=company_search_fn)
+
+    # 1. evidence on a page
+    if name and domains:
+        read = 0
+        for hit in _search_hits(search_fn, f'"{name}" {company}'.strip()):
+            url = str(hit.get("url") or "")
+            host = registered_domain(urlparse(url).hostname or "")
+            if not url or _is_excluded(host):
+                continue
+            emails = extract_emails(_page_text(read_fn, url), domains)
+            read += 1
+            if emails:
+                status = "found_official" if host in domains else "found_public"
+                level = "official_company_public" if status == "found_official" else "professional_public"
+                _store(conn, candidate_id, email=emails[0], email_status=status,
+                       evidence_url=url, verification_status=level)
+                return {"email": emails[0], "email_status": status, "evidence_url": url, "verdict": "read"}
+            if read >= MAX_PAGES_PER_PERSON:
+                break
+
+    # 2. learned pattern + probe
+    observed, people = _observed_at_company(conn, company)
+    first, last = split_name(name)
+    pattern = learn_pattern(observed, people) if first and last else None
+    if pattern:
+        domain = max((addr.rpartition("@")[2] for addr in observed),
+                     key=lambda d: sum(1 for a in observed if a.endswith("@" + d)))
+        guess = apply_pattern(pattern, first, last, domain)
+        result = verify_fn(guess)
+        verdict = getattr(result, "verdict", "unverifiable_no_smtp") if result else "unverifiable_no_smtp"
+        if verdict == "rejected":
+            _store(conn, candidate_id, email="", email_status="rejected", evidence_url="", verification_status=None)
+            return {"email": "", "email_status": "rejected", "evidence_url": "", "verdict": verdict}
+        _store(conn, candidate_id, email=guess, email_status="inferred", evidence_url="", verification_status=None)
+        return {"email": guess, "email_status": "inferred", "evidence_url": "", "verdict": verdict}
+
+    # 3. nothing observed
+    _store(conn, candidate_id, email=str(candidate.get("email") or ""), email_status="none",
+           evidence_url="", verification_status=None)
+    return {"email": "", "email_status": "none", "evidence_url": "", "verdict": "no_pattern"}
