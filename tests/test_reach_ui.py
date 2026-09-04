@@ -52,7 +52,10 @@ CREATE TABLE IF NOT EXISTS people_candidates (
     current_role_confirmed_at TEXT,
     promoted_contact_id TEXT,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    email_status TEXT DEFAULT 'none',
+    email_evidence_url TEXT,
+    email_checked_at TEXT
 );
 """
 
@@ -85,6 +88,14 @@ def make_db(directory):
             ("p_lo", "tgt_b", "Sara Idrissi", "Cloud Architect", "Globex Cloud", "Cloud Architect",
              "", "https://example.test/talk", "Sara spoke at the cloud meetup.", "public_web", 40,
              "email_verified", NOW, NOW, NOW),
+        ],
+    )
+    connection.executemany(
+        "UPDATE people_candidates SET email = ?, email_status = ?, email_evidence_url = ? WHERE id = ?",
+        [
+            ("amina.tazi@acme.example", "found_official", "https://acme.example/team", "p_hi"),
+            ("youssef.benali@acme.example", "inferred", "", "p_mid"),
+            ("", "none", "", "p_lo"),
         ],
     )
     connection.commit()
@@ -174,12 +185,64 @@ class ReachUiTests(unittest.TestCase):
         confirmed = page.locator("#people-list .card", has_text="Amina Tazi")
         self.assertTrue(confirmed.get_by_role("button", name="Promote to contact").is_enabled())
         self.assertEqual(card.get_by_role("button", name="Confirm current role").count(), 1)
-        self.assertEqual(card.get_by_role("button", name="Copy LinkedIn draft").count(), 1)
+        self.assertEqual(card.get_by_role("button", name="Copy LinkedIn note").count(), 1)
+        self.assertEqual(card.get_by_role("button", name="Copy LinkedIn message").count(), 1)
+        self.assertTrue(card.get_by_role("button", name="Copy email").is_enabled())
+        self.assertEqual(card.get_by_role("button", name="Preview draft").count(), 1)
+        no_email = page.locator("#people-list .card", has_text="Sara Idrissi")
+        self.assertEqual(no_email.get_by_role("button", name="Copy email", disabled=True).count(), 1)
+        self.assertEqual(card.get_by_role("button", name="Copy LinkedIn draft").count(), 0)
         self.assertIn("Amina leads the data team.", confirmed.inner_text())
         links = page.locator("#people-list a[target='_blank']")
         for index in range(links.count()):
             self.assertEqual(links.nth(index).get_attribute("rel"), "noopener")
         self.assertIn("linkedin_people_scan.py", page.locator("#page-people code").inner_text())
+        self.assertEqual(errors, [])
+
+    def test_people_cards_show_email_and_how_it_was_found(self):
+        page, errors = self.open("people")
+        if not self.api_available(page, "people"):
+            self.skipTest("/api/reach/people is not served yet")
+        page.wait_for_selector("#people-list .card")
+        badges = [b.strip() for b in page.locator("#people-list .badge").all_inner_texts()]
+        for words in ("email found on official page", "email inferred, confirm before use", "no email"):
+            self.assertIn(words, badges)
+        official = page.locator("#people-list .card", has_text="Amina Tazi")
+        self.assertEqual(official.locator("a[href^='mailto:']").count(), 1)
+        self.assertEqual(official.locator("a[href^='mailto:']").get_attribute("href"), "mailto:amina.tazi@acme.example")
+        self.assertIn("amina.tazi@acme.example", official.inner_text())
+        self.assertEqual(official.locator(".email-line svg").count(), 1)
+        inferred = page.locator("#people-list .card", has_text="Youssef Benali")
+        self.assertEqual(inferred.locator("a[href^='mailto:']").count(), 1)
+        none = page.locator("#people-list .card", has_text="Sara Idrissi")
+        self.assertEqual(none.locator("a[href^='mailto:']").count(), 0)
+        self.assertEqual(errors, [])
+
+    def test_people_card_draft_preview_and_copy(self):
+        page, errors = self.open("people")
+        if not self.api_available(page, "people"):
+            self.skipTest("/api/reach/people is not served yet")
+        page.wait_for_selector("#people-list .card")
+        card = page.locator("#people-list .card", has_text="Sara Idrissi")
+        self.assertEqual(page.locator("#people-list .card").count(), 3)
+        self.assertEqual(page.locator("#people-list .card pre").count(), 0)
+        preview = card.get_by_role("button", name="Preview draft")
+        preview.click()
+        card.locator("pre").wait_for()
+        text = card.locator("pre").inner_text()
+        self.assertIn("Hi Sara,", text)
+        self.assertIn("Thank you, the candidate", text)
+        self.assertEqual(preview.get_attribute("aria-expanded"), "true")
+        self.assertEqual(card.get_by_role("button", name="Copy email", disabled=True).count(), 1)
+        page.context.grant_permissions(["clipboard-read", "clipboard-write"])
+        card.get_by_role("button", name="Copy LinkedIn message").click()
+        page.locator("#toast.show").wait_for()
+        self.assertEqual(page.locator("#toast").inner_text().strip(), "Draft copied. Nothing was sent.")
+        copied = page.evaluate("navigator.clipboard.readText()")
+        self.assertIn("Hi Sara,", copied)
+        self.assertIn("One concrete point:", copied)
+        preview.click()
+        self.assertEqual(card.locator("pre").count(), 0)
         self.assertEqual(errors, [])
 
     def test_jobs_empty_state(self):
@@ -195,6 +258,7 @@ class ReachUiTests(unittest.TestCase):
         page, errors = self.open("runs")
         self.assertEqual(page.get_by_role("button", name="Run Morocco job radar").count(), 1)
         self.assertEqual(page.get_by_role("button", name="Find people on public web").count(), 1)
+        self.assertEqual(page.get_by_role("button", name="Find emails for a target").count(), 1)
         self.assertEqual(page.locator("#page-runs .btn-primary").count(), 1)
         self.assertEqual(errors, [])
 

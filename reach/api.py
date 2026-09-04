@@ -60,7 +60,10 @@ def handle_post(db_path, endpoint: str, payload: dict[str, Any], root=None) -> t
         if action == "promote":
             return 200, promote_candidate(db_path, candidate_id)
         if action == "draft":
-            return 201, draft_candidate(db_path, candidate_id, payload)
+            # Legacy shape {lang, fact, channel: linkedin|email} keeps the old fact-based draft.
+            if "fact" in payload and payload.get("channel") not in COMPOSE_CHANNELS:
+                return 201, draft_candidate(db_path, candidate_id, payload)
+            return smart_draft_candidate(db_path, candidate_id, payload)
     raise NotFoundError("endpoint not found")
 
 
@@ -160,10 +163,19 @@ def _default_save_draft(db_path, candidate: dict, body: str, channel: str,
         connection.close()
 
 
+def _default_compose(person: dict, channel: str, lang: str, kind: str = "internship",
+                     company: str | None = None) -> dict:
+    from reach.drafts import compose
+
+    return compose(person, channel, lang, kind=kind, company=company)
+
+
 # Indirections so tests can patch without the sibling modules being present.
 PROMOTE = _default_promote
 DRAFT_FOR = _default_draft_for
 SAVE_DRAFT = _default_save_draft
+COMPOSE = _default_compose
+COMPOSE_CHANNELS = ("linkedin_note", "linkedin_message", "email")
 
 
 def _get_candidate(connection, candidate_id: str) -> dict[str, Any]:
@@ -263,6 +275,50 @@ def draft_candidate(db_path, candidate_id: str, payload: dict[str, Any]) -> dict
     body = DRAFT_FOR(candidate, lang, fact, channel, opportunity)
     draft_id = SAVE_DRAFT(db_path, candidate, body, channel, opportunity_id)
     return {"draft_id": draft_id, "body": body}
+
+
+def smart_draft_candidate(db_path, candidate_id: str, payload: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+    """POST people/<id>/draft {lang, channel, kind?}: compose one draft from the
+    fact sheet and the candidate's evidence, lint it, save it as draft_not_opened.
+
+    Works before promotion (contact_id stays NULL; source_json keeps the
+    candidate id). 400 on bad lang/channel, 422 with the lint list if the
+    draft fails lint. Never sends anything.
+    """
+    lang = str(payload.get("lang") or "").strip().lower()
+    if lang not in DRAFT_LANGS:
+        raise ValidationError("lang must be fr|en")
+    channel = str(payload.get("channel") or "").strip().lower()
+    if channel not in COMPOSE_CHANNELS:
+        raise ValidationError("channel must be linkedin_note|linkedin_message|email")
+    kind = str(payload.get("kind") or "internship").strip().lower()
+    if kind not in ("internship", "job"):
+        raise ValidationError("kind must be internship|job")
+    connection = pipeline_v2.connect(db_path)
+    try:
+        candidate = _get_candidate(connection, candidate_id)
+        draft = COMPOSE(candidate, channel, lang, kind=kind, company=payload.get("company") or None)
+        if draft.get("lint"):
+            return 422, {"error": "draft failed lint", "lint": list(draft["lint"])}
+        from reach.drafts import save_draft
+
+        contact_id = candidate.get("promoted_contact_id") or None
+        route_id = None
+        if contact_id:
+            route = connection.execute(
+                "SELECT id FROM contact_routes WHERE contact_id = ? AND route_type = ?"
+                " ORDER BY is_verified DESC, id LIMIT 1",
+                (contact_id, "email" if channel == "email" else "linkedin"),
+            ).fetchone()
+            route_id = route["id"] if route else None
+        db_channel = "email" if channel == "email" else "linkedin"
+        draft_id = save_draft(connection, contact_id, None, route_id, db_channel, lang, draft["body"],
+                              subject=draft.get("subject"),
+                              extra={"candidate_id": candidate_id, "channel": channel, "kind": kind,
+                                     "persona": draft.get("persona"), "proof_id": draft.get("proof_id")})
+        return 200, {"draft_id": draft_id, "subject": draft.get("subject"), "body": draft["body"], "lint": []}
+    finally:
+        connection.close()
 
 
 # --- D3: radar jobs ------------------------------------------------------------

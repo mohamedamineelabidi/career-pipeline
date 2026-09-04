@@ -245,6 +245,84 @@ class ReachApiHttpTests(unittest.TestCase):
                              "draft_not_opened")
             connection.close()
 
+    def test_smart_draft_endpoint_composes_saves_and_gates(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db_path, base = self.start_server(directory)
+            self.seed_people(db_path)
+            connection = sqlite3.connect(str(db_path))
+            connection.execute("UPDATE people_candidates SET headline = 'Head of Data @ Globex', role_seen = 'Head of Data',"
+                               " company_seen = 'Globex' WHERE id = 'p_ok'")
+            connection.commit()
+            connection.close()
+            code, body = self.request_error(base, "/api/reach/people/p_ok/draft", "POST",
+                                            {"lang": "fr", "channel": "fax"})
+            self.assertEqual(code, 400)
+            code, body = self.request_error(base, "/api/reach/people/p_ok/draft", "POST",
+                                            {"lang": "de", "channel": "linkedin_note"})
+            self.assertEqual(code, 400)
+            code, _ = self.request_error(base, "/api/reach/people/missing/draft", "POST",
+                                         {"lang": "en", "channel": "linkedin_note"})
+            self.assertEqual(code, 404)
+            # Not promoted yet: the draft is still composed and saved without a contact link.
+            status, body = self.request_json(base, "/api/reach/people/p_ok/draft", "POST",
+                                             {"lang": "en", "channel": "linkedin_note"})
+            self.assertEqual(status, 200)
+            self.assertEqual(body["lint"], [])
+            self.assertIsNone(body["subject"])
+            self.assertTrue(body["body"].startswith("Hi Omar,"))
+            self.assertLessEqual(len(body["body"]), 300)
+            status, email = self.request_json(base, "/api/reach/people/p_ok/draft", "POST",
+                                              {"lang": "fr", "channel": "email"})
+            self.assertEqual(status, 200)
+            self.assertIn("Globex", email["subject"])
+            self.assertIn("Bonjour Omar,", email["body"])
+            connection = sqlite3.connect(str(db_path))
+            rows = connection.execute("SELECT id, contact_id, channel, subject, status, source_json FROM drafts"
+                                      " ORDER BY created_at").fetchall()
+            connection.close()
+            self.assertEqual([r[0] for r in rows], [body["draft_id"], email["draft_id"]])
+            self.assertEqual([r[4] for r in rows], ["draft_not_opened", "draft_not_opened"])
+            self.assertEqual([r[2] for r in rows], ["linkedin", "email"])
+            self.assertEqual(rows[0][1], None)
+            self.assertEqual(rows[1][3], email["subject"])
+            source = json.loads(rows[0][5])
+            self.assertEqual(source["candidate_id"], "p_ok")
+            self.assertEqual(source["channel"], "linkedin_note")
+            self.assertEqual(source["persona"], "senior")
+            # Promoted: the draft links to the contact.
+            connection = sqlite3.connect(str(db_path))
+            connection.execute("INSERT INTO contacts (id, name, source_json, created_at, updated_at)"
+                               " VALUES ('c_1', 'Omar', '{}', 'x', 'x')")
+            connection.execute("UPDATE people_candidates SET promoted_contact_id = 'c_1' WHERE id = 'p_ok'")
+            connection.commit()
+            connection.close()
+            status, msg = self.request_json(base, "/api/reach/people/p_ok/draft", "POST",
+                                            {"lang": "en", "channel": "linkedin_message"})
+            self.assertEqual(status, 200)
+            connection = sqlite3.connect(str(db_path))
+            self.assertEqual(connection.execute("SELECT contact_id FROM drafts WHERE id = ?",
+                                                (msg["draft_id"],)).fetchone()[0], "c_1")
+            connection.close()
+
+    def test_smart_draft_endpoint_returns_422_when_lint_fails(self):
+        import reach.api as reach_api
+
+        def bad_compose(person, channel, lang, kind="internship", company=None):
+            return {"subject": None, "body": "Je suis passionné", "persona": "peer", "proof_id": "arya",
+                    "lint": ["banned:passionné"]}
+
+        with tempfile.TemporaryDirectory() as directory, \
+                unittest.mock.patch.object(reach_api, "COMPOSE", bad_compose):
+            db_path, base = self.start_server(directory)
+            self.seed_people(db_path)
+            code, body = self.request_error(base, "/api/reach/people/p_ok/draft", "POST",
+                                            {"lang": "fr", "channel": "linkedin_note"})
+            self.assertEqual(code, 422)
+            self.assertEqual(body["lint"], ["banned:passionné"])
+            connection = sqlite3.connect(str(db_path))
+            self.assertEqual(connection.execute("SELECT count(*) FROM drafts").fetchone()[0], 0)
+            connection.close()
+
     # D3 ---------------------------------------------------------------
     def seed_opportunities(self, db_path):
         connection = sqlite3.connect(str(db_path))

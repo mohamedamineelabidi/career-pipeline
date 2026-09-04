@@ -269,9 +269,14 @@ pre { background: var(--color-surface-raised); border: 1px solid var(--color-bor
         <p class="lede">Background collectors. Each run is recorded here with its status and details.</p>
       </div>
       <div class="block">
-        <div class="actions" style="margin-top: 0">
+        <div class="field" style="max-width: 360px">
+          <label for="runs-target">Target company for people and email runs</label>
+          <select id="runs-target"><option value="">Choose a target</option></select>
+        </div>
+        <div class="actions" style="margin-top: var(--space-2)">
           <button type="button" class="btn btn-primary" id="run-radar">Run Morocco job radar</button>
           <button type="button" class="btn btn-secondary" id="run-people">Find people on public web</button>
+          <button type="button" class="btn btn-secondary" id="run-emails">Find emails for a target</button>
         </div>
         <p class="error" id="runs-error" role="alert"></p>
       </div>
@@ -382,6 +387,32 @@ pre { background: var(--color-surface-raised); border: 1px solid var(--color-bor
     return el('a', { href: href, target: '_blank', rel: 'noopener', text: text });
   }
 
+  function mailIcon() {
+    return document.getElementById('tpl-mail-icon').content.firstElementChild.cloneNode(true);
+  }
+
+  var EMAIL_WORDS = {
+    found_official: ['email found on official page', 'badge badge-success'],
+    found_public: ['email found on public page', 'badge badge-success'],
+    inferred: ['email inferred, confirm before use', 'badge badge-warning'],
+    rejected: ['email pattern rejected', 'badge badge-danger'],
+    none: ['no email', 'badge']
+  };
+
+  function emailLine(person) {
+    var status = person.email_status || (person.email ? 'found_public' : 'none');
+    var words = EMAIL_WORDS[status] || EMAIL_WORDS.none;
+    var line = el('p', { className: 'email-line', style: 'margin-top: var(--space-2); display: flex; align-items: center; gap: var(--space-1); flex-wrap: wrap' });
+    line.appendChild(mailIcon());
+    if (person.email) {
+      line.appendChild(el('a', { href: 'mailto:' + person.email, text: person.email }));
+    } else {
+      line.appendChild(el('span', { className: 'muted', text: 'No address on record' }));
+    }
+    line.appendChild(el('span', { className: words[1], text: words[0] }));
+    return line;
+  }
+
   /* Targets */
   function renderTargets() {
     var list = document.getElementById('targets-list');
@@ -413,10 +444,16 @@ pre { background: var(--color-surface-raised); border: 1px solid var(--color-bor
   }
 
   function fillTargetSelect() {
-    var select = document.getElementById('people-target');
+    fillOneTargetSelect('people-target', 'All targets');
+    fillOneTargetSelect('runs-target', 'Choose a target');
+  }
+
+  function fillOneTargetSelect(id, emptyLabel) {
+    var select = document.getElementById(id);
+    if (!select) { return; }
     var current = select.value;
     clear(select);
-    select.appendChild(el('option', { value: '', text: 'All targets' }));
+    select.appendChild(el('option', { value: '', text: emptyLabel }));
     (state.targets || []).forEach(function (target) {
       select.appendChild(el('option', { value: target.id, text: target.name }));
     });
@@ -512,6 +549,7 @@ pre { background: var(--color-surface-raised); border: 1px solid var(--color-bor
     if (person.current_role_confirmed_at) { badges.appendChild(el('span', { className: 'badge badge-success', text: 'role confirmed' })); }
     if (person.promoted_contact_id) { badges.appendChild(el('span', { className: 'badge badge-success', text: 'promoted to contact' })); }
     card.appendChild(badges);
+    card.appendChild(emailLine(person));
 
     var links = el('p', { style: 'margin-top: var(--space-2)' });
     if (person.profile_url) { links.appendChild(externalLink(person.profile_url, 'Public profile')); }
@@ -525,7 +563,16 @@ pre { background: var(--color-surface-raised); border: 1px solid var(--color-bor
     var actions = el('div', { className: 'actions' });
     var confirmButton = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Confirm current role' });
     var promoteButton = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Promote to contact' });
-    var draftButton = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Copy LinkedIn draft' });
+    var noteButton = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Copy LinkedIn note' });
+    var messageButton = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Copy LinkedIn message' });
+    var emailButton = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Copy email' });
+    var previewButton = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Preview draft', 'aria-expanded': 'false' });
+    var preview = null;
+    if (!person.email) {
+      emailButton.disabled = true;
+      emailButton.setAttribute('aria-disabled', 'true');
+      emailButton.title = 'No email on file yet';
+    }
     if (person.current_role_confirmed_at) {
       confirmButton.setAttribute('aria-pressed', 'true');
     }
@@ -537,9 +584,6 @@ pre { background: var(--color-surface-raised); border: 1px solid var(--color-bor
       promoteButton.disabled = true;
       promoteButton.setAttribute('aria-disabled', 'true');
       promoteButton.title = 'Already promoted to a contact';
-    }
-    if (!person.promoted_contact_id) {
-      draftButton.title = 'Promote to contact first';
     }
 
     confirmButton.addEventListener('click', function () {
@@ -568,31 +612,67 @@ pre { background: var(--color-surface-raised); border: 1px solid var(--color-bor
         });
     });
 
-    draftButton.addEventListener('click', function () {
-      error.textContent = '';
-      var fact = person.evidence_quote || person.role_seen || person.headline || '';
-      draftButton.setAttribute('aria-busy', 'true');
-      draftButton.textContent = 'Copying LinkedIn draft';
-      api('POST', '/api/reach/people/' + encodeURIComponent(person.id) + '/draft', { lang: 'en', fact: fact, channel: 'linkedin' })
+    function requestDraft(channel) {
+      return api('POST', '/api/reach/people/' + encodeURIComponent(person.id) + '/draft', { lang: 'en', channel: channel })
         .then(function (result) {
           var body = result && result.body ? result.body : '';
+          var subject = result && result.subject ? result.subject : '';
+          return { body: body, subject: subject, text: subject ? 'Subject: ' + subject + '\n\n' + body : body };
+        });
+    }
+
+    function copyDraft(button, label, channel) {
+      error.textContent = '';
+      button.setAttribute('aria-busy', 'true');
+      button.textContent = 'Copying draft';
+      requestDraft(channel)
+        .then(function (draft) {
           var copy = (navigator.clipboard && navigator.clipboard.writeText)
-            ? navigator.clipboard.writeText(body)
+            ? navigator.clipboard.writeText(draft.text)
             : Promise.reject(new Error('Clipboard is not available in this browser.'));
           return copy.then(function () { toast('Draft copied. Nothing was sent.'); });
         })
         .catch(function (failure) {
-          error.textContent = failure.status === 409 ? 'Promote to contact before drafting.' : failure.message;
+          error.textContent = failure.status === 422 ? 'The draft did not pass the lint gate.' : failure.message;
         })
         .then(function () {
-          draftButton.removeAttribute('aria-busy');
-          draftButton.textContent = 'Copy LinkedIn draft';
+          button.removeAttribute('aria-busy');
+          button.textContent = label;
         });
+    }
+
+    noteButton.addEventListener('click', function () { copyDraft(noteButton, 'Copy LinkedIn note', 'linkedin_note'); });
+    messageButton.addEventListener('click', function () { copyDraft(messageButton, 'Copy LinkedIn message', 'linkedin_message'); });
+    emailButton.addEventListener('click', function () { copyDraft(emailButton, 'Copy email', 'email'); });
+
+    previewButton.addEventListener('click', function () {
+      error.textContent = '';
+      if (preview) {
+        card.removeChild(preview);
+        preview = null;
+        previewButton.setAttribute('aria-expanded', 'false');
+        return;
+      }
+      var channel = person.email ? 'email' : 'linkedin_message';
+      previewButton.setAttribute('aria-busy', 'true');
+      requestDraft(channel)
+        .then(function (draft) {
+          preview = el('pre', { className: 'draft-preview', text: draft.text });
+          card.insertBefore(preview, error);
+          previewButton.setAttribute('aria-expanded', 'true');
+        })
+        .catch(function (failure) {
+          error.textContent = failure.status === 422 ? 'The draft did not pass the lint gate.' : failure.message;
+        })
+        .then(function () { previewButton.removeAttribute('aria-busy'); });
     });
 
     actions.appendChild(confirmButton);
     actions.appendChild(promoteButton);
-    actions.appendChild(draftButton);
+    actions.appendChild(noteButton);
+    actions.appendChild(messageButton);
+    actions.appendChild(emailButton);
+    actions.appendChild(previewButton);
     card.appendChild(actions);
     card.appendChild(error);
     return card;
@@ -740,12 +820,18 @@ pre { background: var(--color-surface-raised); border: 1px solid var(--color-bor
     });
   }
 
-  function startRun(stage, button, label) {
+  function startRun(stage, button, label, needsTarget) {
     var error = document.getElementById('runs-error');
     error.textContent = '';
+    var payload = { stage: stage };
+    if (needsTarget) {
+      var targetId = document.getElementById('runs-target').value;
+      if (!targetId) { error.textContent = 'Choose a target company first.'; return; }
+      payload.target_id = targetId;
+    }
     button.setAttribute('aria-busy', 'true');
     button.textContent = 'Starting ' + label;
-    api('POST', '/api/reach/run', { stage: stage })
+    api('POST', '/api/reach/run', payload)
       .then(function () { toast('Run started.'); return loadRuns(); })
       .catch(function (failure) {
         error.textContent = failure.status === 429 ? 'A run is already in progress. Wait for it to finish.' : failure.message;
@@ -756,10 +842,13 @@ pre { background: var(--color-surface-raised); border: 1px solid var(--color-bor
       });
   }
   document.getElementById('run-radar').addEventListener('click', function () {
-    startRun('radar', this, 'Run Morocco job radar');
+    startRun('radar', this, 'Run Morocco job radar', false);
   });
   document.getElementById('run-people').addEventListener('click', function () {
-    startRun('people_public', this, 'Find people on public web');
+    startRun('people_public', this, 'Find people on public web', true);
+  });
+  document.getElementById('run-emails').addEventListener('click', function () {
+    startRun('emails', this, 'Find emails for a target', true);
   });
 
   /* Router */
@@ -812,5 +901,6 @@ pre { background: var(--color-surface-raised); border: 1px solid var(--color-bor
   route();
 })();
 </script>
+<template id="tpl-mail-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg></template>
 </body>
 </html>

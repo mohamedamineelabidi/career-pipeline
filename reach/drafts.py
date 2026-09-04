@@ -372,11 +372,12 @@ def draft_for(contact: dict, opportunity: dict | None, lang: str, fact: str,
 
 def save_draft(conn: sqlite3.Connection, contact_id: str, opportunity_id, contact_route_id,
                channel: str, lang: str, body: str, subject: str | None = None,
-               fact: str | None = None) -> str:
+               fact: str | None = None, extra: dict | None = None) -> str:
     """Insert the draft with status draft_not_opened and return its id."""
     draft_id = "dr_" + uuid.uuid4().hex
     now = _now()
     source = {"generator": "reach", "fact": fact, "lang": lang}
+    source.update(extra or {})
     conn.execute(
         "INSERT INTO drafts(id, opportunity_id, contact_id, contact_route_id, channel, subject, "
         "body, status, source_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
