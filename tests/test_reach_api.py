@@ -406,6 +406,7 @@ class ReachApiHttpTests(unittest.TestCase):
         self.assertEqual(result["rejected"], 0)
 
     def test_emails_run_is_accepted_over_http(self):
+        import time
         import reach.api as reach_api
         with tempfile.TemporaryDirectory() as directory:
             db_path, base = self.start_server(directory)
@@ -415,6 +416,14 @@ class ReachApiHttpTests(unittest.TestCase):
                 status, body = self.request_json(base, "/api/reach/run", "POST", {"stage": "emails", "target_id": "tgt_1"})
                 self.assertEqual(status, 202)
                 self.assertTrue(body["run_id"])
+                deadline = time.time() + 3
+                while time.time() < deadline:
+                    _, runs = self.request_json(base, "/api/reach/runs")
+                    if runs and runs[0]["status"] != "running":
+                        break
+                    time.sleep(0.05)
+                self.assertEqual(runs[0]["run_type"], "reach_emails")
+                self.assertEqual(runs[0]["status"], "ok")
 
 
 if __name__ == "__main__":
