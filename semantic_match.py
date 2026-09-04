@@ -39,18 +39,8 @@ from pipeline_v2 import NotFoundError, PathLike, ValidationError, connect
 
 ROOT = Path(__file__).resolve().parent
 TAXONOMY_PATH = ROOT / "skills_taxonomy.json"
-def _profile_path(base, filename):
-    """Return the personal profile file, or the shipped example when absent."""
-    import pathlib as _pathlib
-    real = _pathlib.Path(base) / filename
-    if real.exists():
-        return real
-    example = _pathlib.Path(base) / filename.replace(".yaml", ".example.yaml")
-    return example if example.exists() else real
-
-
-CAREER_MASTER_PATH = _profile_path(ROOT / "reference_cv_2027" / "data", "career_master.yaml")
-EVIDENCE_REGISTER_PATH = _profile_path(ROOT / "reference_cv_2027" / "data", "evidence_register.yaml")
+CAREER_MASTER_PATH = ROOT / "reference_cv_2027" / "data" / "career_master.yaml"
+EVIDENCE_REGISTER_PATH = ROOT / "reference_cv_2027" / "data" / "evidence_register.yaml"
 MODEL_CACHE_DIR = ROOT / ".models"
 EMBED_MODEL_NAME = "all-MiniLM-L6-v2"
 FALLBACK_MODEL_NAME = "tfidf-fallback"

@@ -51,22 +51,40 @@ wheels = [
 ]
 
 [[package]]
-name = "career-pipeline-v2"
-version = "0.1.0"
+name = "career-pipeline"
+version = "0.2.0"
 source = { virtual = "." }
 dependencies = [
     { name = "feedparser" },
     { name = "jinja2" },
+    { name = "pyyaml" },
+    { name = "rapidfuzz" },
+]
+
+[package.optional-dependencies]
+all = [
     { name = "playwright" },
     { name = "pypdf" },
     { name = "pypdfium2" },
     { name = "python-jobspy" },
-    { name = "pyyaml" },
-    { name = "rapidfuzz" },
     { name = "rendercv", extra = ["full"] },
     { name = "scikit-learn" },
     { name = "sentence-transformers" },
     { name = "typst" },
+]
+browser = [
+    { name = "playwright" },
+    { name = "python-jobspy" },
+]
+cv = [
+    { name = "pypdf" },
+    { name = "pypdfium2" },
+    { name = "rendercv", extra = ["full"] },
+    { name = "typst" },
+]
+ml = [
+    { name = "scikit-learn" },
+    { name = "sentence-transformers" },
 ]
 
 [package.dev-dependencies]
@@ -77,19 +95,21 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "career-pipeline", extras = ["ml", "cv", "browser"], marker = "extra == 'all'" },
     { name = "feedparser", specifier = ">=6.0.14" },
     { name = "jinja2", specifier = ">=3.1,<4" },
-    { name = "playwright", specifier = ">=1.62.0" },
-    { name = "pypdf", specifier = ">=6,<7" },
-    { name = "pypdfium2", specifier = ">=4,<6" },
-    { name = "python-jobspy", specifier = ">=1.1.82" },
+    { name = "playwright", marker = "extra == 'browser'", specifier = ">=1.62.0" },
+    { name = "pypdf", marker = "extra == 'cv'", specifier = ">=6,<7" },
+    { name = "pypdfium2", marker = "extra == 'cv'", specifier = ">=4,<6" },
+    { name = "python-jobspy", marker = "extra == 'browser'", specifier = ">=1.1.82" },
     { name = "pyyaml", specifier = ">=6,<7" },
     { name = "rapidfuzz", specifier = ">=3.14.6" },
-    { name = "rendercv", extras = ["full"], specifier = ">=2.3,<2.4" },
-    { name = "scikit-learn", specifier = ">=1.9.0" },
-    { name = "sentence-transformers", specifier = ">=6.0.1" },
-    { name = "typst", specifier = ">=0.13,<0.14" },
+    { name = "rendercv", extras = ["full"], marker = "extra == 'cv'", specifier = ">=2.3,<2.4" },
+    { name = "scikit-learn", marker = "extra == 'ml'", specifier = ">=1.9.0" },
+    { name = "sentence-transformers", marker = "extra == 'ml'", specifier = ">=6.0.1" },
+    { name = "typst", marker = "extra == 'cv'", specifier = ">=0.13,<0.14" },
 ]
+provides-extras = ["ml", "cv", "browser", "all"]
 
 [package.metadata.requires-dev]
 dev = [

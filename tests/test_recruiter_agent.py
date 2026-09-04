@@ -82,7 +82,7 @@ class RecruiterAgentTests(unittest.TestCase):
 
     GOOD_CV = (
         "JORDAN RIVERA\n"
-        "you@example.com +351 912345678\n"
+        "you@example.com +000 000000000\n"
         "Data Engineer at Acme target. Python, Kafka, FastAPI pipelines.\n"
     )
 

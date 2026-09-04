@@ -28,17 +28,7 @@ from pipeline_v2 import ConflictError, NotFoundError, ValidationError, connect
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 PROFILES_PATH = PROJECT_ROOT / "ats_form_profiles.json"
-def _profile_path(base, filename):
-    """Return the personal profile file, or the shipped example when absent."""
-    import pathlib as _pathlib
-    real = _pathlib.Path(base) / filename
-    if real.exists():
-        return real
-    example = _pathlib.Path(base) / filename.replace(".yaml", ".example.yaml")
-    return example if example.exists() else real
-
-
-CAREER_MASTER_PATH = _profile_path(PROJECT_ROOT / "reference_cv_2027" / "data", "career_master.yaml")
+CAREER_MASTER_PATH = PROJECT_ROOT / "reference_cv_2027" / "data" / "career_master.yaml"
 SCREENSHOT_DIR = PROJECT_ROOT / "application_prep"
 
 ATS_NAMES = ("greenhouse", "workday", "lever", "ashby", "smartrecruiters", "workable", "linkedin", "unknown")

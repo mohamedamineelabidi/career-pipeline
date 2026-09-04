@@ -26,6 +26,69 @@ TABLES = (
     "recruiter_reviews",
 )
 
+# Reach system tables (see reach/DESIGN.md). Applied with IF NOT EXISTS on every
+# migrate/serve so existing databases gain them on next start.
+REACH_SCHEMA = """
+CREATE TABLE IF NOT EXISTS target_companies (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    aliases_json TEXT DEFAULT '[]',
+    sector TEXT,
+    country TEXT,
+    intent TEXT CHECK(intent IN ('internship', 'job', 'referral', 'any')) DEFAULT 'any',
+    priority INTEGER DEFAULT 50,
+    notes TEXT,
+    created_at TEXT,
+    updated_at TEXT
+);
+CREATE TABLE IF NOT EXISTS people_candidates (
+    id TEXT PRIMARY KEY,
+    target_company_id TEXT REFERENCES target_companies(id),
+    name TEXT NOT NULL,
+    headline TEXT,
+    company_seen TEXT,
+    role_seen TEXT,
+    profile_url TEXT,
+    email TEXT,
+    evidence_url TEXT,
+    evidence_quote TEXT,
+    discovered_via TEXT,
+    score INTEGER DEFAULT 0,
+    verification_status TEXT DEFAULT 'unverified',
+    current_role_confirmed_at TEXT,
+    promoted_contact_id TEXT,
+    created_at TEXT,
+    updated_at TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS people_candidates_profile_url
+    ON people_candidates(profile_url)
+    WHERE profile_url IS NOT NULL AND profile_url != '';
+"""
+
+# Columns added after the first Reach release. Applied with ALTER TABLE only
+# when missing, so old and new databases end up with the same shape.
+PEOPLE_CANDIDATES_EXTRA_COLUMNS = (
+    ("email_status",
+     "TEXT DEFAULT 'none' CHECK(email_status IN "
+     "('none','found_official','found_public','inferred','rejected'))"),
+    ("email_evidence_url", "TEXT"),
+    ("email_checked_at", "TEXT"),
+)
+
+
+def existing_columns(connection, table: str) -> set[str]:
+    return {row[1] for row in connection.execute(f"PRAGMA table_info({table})")}
+
+
+def ensure_reach_schema(db_path: Path) -> None:
+    with closing(pipeline_v2.connect(db_path)) as connection:
+        connection.executescript(REACH_SCHEMA)
+        present = existing_columns(connection, "people_candidates")
+        for column, ddl in PEOPLE_CANDIDATES_EXTRA_COLUMNS:
+            if column not in present:
+                connection.execute(f"ALTER TABLE people_candidates ADD COLUMN {column} {ddl}")
+        connection.commit()
+
 
 def migrate_with_backup(source_path: Path, db_path: Path) -> dict[str, int]:
     source = Path(source_path)
@@ -129,9 +192,6 @@ def build_parser() -> argparse.ArgumentParser:
     migrate_parser.add_argument("--source", type=Path, default=root / "jobs_digest.json")
     migrate_parser.add_argument("--db", type=Path, default=root / "career_pipeline_v2.sqlite3")
 
-    init_parser = subparsers.add_parser("init", help="create an empty database with the full schema")
-    init_parser.add_argument("--db", default="career_pipeline_v2.sqlite3")
-
     validate_parser = subparsers.add_parser("validate", help="validate database integrity")
     validate_parser.add_argument("--db", type=Path, default=root / "career_pipeline_v2.sqlite3")
 
@@ -157,19 +217,17 @@ def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "migrate":
         counts = migrate_with_backup(args.source, args.db)
+        ensure_reach_schema(args.db)
         report = validate_integrity(args.db)
         print(json.dumps({"counts": counts, "integrity": report}, indent=2))
         return 0 if report["ok"] else 1
-    if args.command == "init":
-        pipeline_v2.create_schema(args.db)
-        print(json.dumps({"created": str(args.db)}, indent=2))
-        return 0
-
     if args.command == "validate":
         report = validate_integrity(args.db)
         print(json.dumps(report, indent=2))
         return 0 if report["ok"] else 1
     if args.command == "serve":
+        if Path(args.db).exists():
+            ensure_reach_schema(args.db)
         report = validate_integrity(args.db)
         if not report["ok"]:
             print(json.dumps(report, indent=2))

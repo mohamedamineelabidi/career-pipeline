@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reach</title>
+<style>
+:root {
+  --color-primary: #111117;
+  --color-secondary: #70707d;
+  --color-link: #0000ee;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f7f7f5;
+  --color-surface-inverse: #000000;
+  --color-border: #e4e4e0;
+  --color-success: #0f6b3a;
+  --color-warning: #8a5a00;
+  --color-danger: #a4232b;
+  --color-focus: #0000ee;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --text-h1: 42px;
+  --text-h2: 26px;
+  --text-h3: 20px;
+  --text-body-lg: 18px;
+  --text-body-md: 14px;
+  --text-label: 12px;
+  --radius-xs: 8px;
+  --radius-pill: 100px;
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 20px;
+  --space-5: 28px;
+  --space-6: 32px;
+  --space-7: 80px;
+  --nav-width: 240px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-md);
+  line-height: 1.5;
+  color: var(--color-primary);
+  background: var(--color-surface);
+  min-width: 0;
+}
+h1 { font-size: var(--text-h1); font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; margin: 0; }
+h2 { font-size: var(--text-h2); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 var(--space-4); }
+h3 { font-size: var(--text-h3); font-weight: 600; line-height: 1.3; margin: 0; }
+p { margin: 0; }
+a { color: var(--color-link); text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.skip-link {
+  position: absolute; left: var(--space-1); top: -80px;
+  padding: var(--space-2); background: var(--color-surface);
+  border: 1px solid var(--color-border); border-radius: var(--radius-xs);
+}
+.skip-link:focus { top: var(--space-1); z-index: 2; }
+.shell { display: grid; grid-template-columns: var(--nav-width) minmax(0, 1fr); min-height: 100vh; }
+.nav { border-right: 1px solid var(--color-border); padding: var(--space-5) var(--space-3); }
+.brand { display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-body-lg); font-weight: 600; margin-bottom: var(--space-6); }
+.nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+.nav-item {
+  display: flex; align-items: center; gap: var(--space-2); min-height: 44px;
+  padding: var(--space-2); border-radius: var(--radius-xs);
+  color: var(--color-secondary); text-decoration: none; background: var(--color-surface);
+}
+.nav-item:hover { color: var(--color-primary); }
+.nav-item[aria-current="page"] { background: var(--color-surface-raised); color: var(--color-primary); }
+.nav-item svg { flex: none; }
+.main { padding: var(--space-6) var(--space-6) var(--space-7); min-width: 0; }
+.page { display: none; }
+.page.active { display: block; }
+.page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-6); }
+.lede { color: var(--color-secondary); font-size: var(--text-body-md); margin-top: var(--space-1); }
+.block + .block { margin-top: var(--space-7); }
+.card, .card-muted {
+  border: 1px solid var(--color-border); border-radius: var(--radius-xs);
+  padding: var(--space-4); color: var(--color-primary);
+}
+.card { background: var(--color-surface); }
+.card-muted { background: var(--color-surface-raised); }
+.grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.grid > .card-muted { grid-column: 1 / -1; }
+.btn {
+  font: inherit; font-size: var(--text-body-md); line-height: 1.5; cursor: pointer;
+  min-height: 44px; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
+  border: 1px solid var(--color-primary); display: inline-flex; align-items: center; gap: var(--space-1);
+}
+.btn-primary { background: var(--color-primary); color: var(--color-surface); }
+.btn-primary:hover { background: var(--color-surface-inverse); }
+.btn-secondary { background: var(--color-surface); color: var(--color-primary); border-color: var(--color-border); }
+.btn-secondary:hover { background: var(--color-surface-raised); }
+.btn[disabled], .btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+.btn[aria-pressed="true"] { background: var(--color-surface-raised); border-color: var(--color-primary); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-3); }
+.badge {
+  display: inline-block; font-size: var(--text-label); font-weight: 500; line-height: 1.4; letter-spacing: 0.02em;
+  padding: var(--space-1); border-radius: var(--radius-pill); background: var(--color-surface-raised); color: var(--color-secondary);
+}
+.badge-success { color: var(--color-success); }
+.badge-warning { color: var(--color-warning); }
+.badge-danger { color: var(--color-danger); }
+.badges { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); }
+.meta { color: var(--color-secondary); }
+.field { display: grid; gap: var(--space-1); }
+.field label, .legend { font-size: var(--text-label); font-weight: 500; letter-spacing: 0.02em; line-height: 1.4; color: var(--color-secondary); }
+input, select, textarea {
+  font: inherit; font-size: var(--text-body-md); color: var(--color-primary); background: var(--color-surface);
+  border: 1px solid var(--color-border); border-radius: var(--radius-xs); padding: var(--space-2); min-height: 44px; min-width: 0; width: 100%;
+}
+.toolbar { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-end; margin-bottom: var(--space-4); }
+.toolbar .field { flex: 1 1 200px; }
+.segmented { display: inline-flex; gap: var(--space-1); }
+.table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-xs); }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: var(--space-2); border-bottom: 1px solid var(--color-border); vertical-align: top; }
+th { font-size: var(--text-label); font-weight: 500; letter-spacing: 0.02em; color: var(--color-secondary); }
+tr:last-child td { border-bottom: 0; }
+.pager { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-3); }
+.person-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.quote { border-left: 1px solid var(--color-border); padding-left: var(--space-2); margin: var(--space-2) 0 0; color: var(--color-secondary); }
+code, pre { font-family: ui-monospace, Consolas, monospace; font-size: var(--text-body-md); }
+pre { background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: var(--radius-xs); padding: var(--space-2); overflow-x: auto; margin: var(--space-2) 0 0; white-space: pre-wrap; word-break: break-word; }
+.error { color: var(--color-danger); margin-top: var(--space-1); }
+.error:empty { display: none; }
+.toast {
+  position: fixed; left: 50%; bottom: var(--space-4); transform: translateX(-50%);
+  background: var(--color-surface); color: var(--color-primary); border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs); padding: var(--space-2) var(--space-4); display: none;
+}
+.toast.show { display: block; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.runs-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+.runs-list li { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-xs); }
+@media (max-width: 820px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .nav { border-right: 0; border-bottom: 1px solid var(--color-border); padding: var(--space-3); }
+  .nav ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .brand { margin-bottom: var(--space-3); }
+  .main { padding: var(--space-4) var(--space-3) var(--space-7); }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  h1 { font-size: var(--text-h2); }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="shell">
+  <nav class="nav" aria-label="Reach sections">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v18M3 12h18"></path></svg>
+      <span>Reach</span>
+    </div>
+    <ul>
+      <li><a class="nav-item" href="#/targets" data-route="targets"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle></svg>Targets</a></li>
+      <li><a class="nav-item" href="#/people" data-route="people"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 4a4 4 0 0 1 0 8M22 21c0-3-2-5-5-6"></path></svg>People</a></li>
+      <li><a class="nav-item" href="#/jobs" data-route="jobs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>Morocco Jobs</a></li>
+      <li><a class="nav-item" href="#/runs" data-route="runs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4l14 8-14 8z"></path></svg>Runs</a></li>
+    </ul>
+  </nav>
+  <main id="main" class="main" tabindex="-1">
+    <h1 id="page-title">Targets</h1>
+
+    <section class="page" id="page-targets" aria-labelledby="page-title">
+      <div class="page-head">
+        <p class="lede">Companies worth reaching. Add one and the people finder can look for its staff on the public web.</p>
+      </div>
+      <div class="block">
+        <form id="target-form" class="card">
+          <h2>Add a target company</h2>
+          <div class="toolbar">
+            <div class="field">
+              <label for="target-name">Company name</label>
+              <input id="target-name" name="name" required autocomplete="organization">
+            </div>
+            <div class="field">
+              <label for="target-intent">Intent</label>
+              <select id="target-intent" name="intent">
+                <option value="internship">Internship</option>
+                <option value="job">Job</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Add target company</button>
+          </div>
+          <p class="error" id="target-error" role="alert"></p>
+        </form>
+      </div>
+      <div class="block">
+        <h2>Target list</h2>
+        <div id="targets-list" class="grid"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-people" aria-labelledby="page-title">
+      <div class="page-head">
+        <p class="lede">Candidates found on the public web. Confirm the current role before promoting anyone to a contact. Drafts are copied, never sent.</p>
+      </div>
+      <div class="block">
+        <div class="toolbar">
+          <div class="field">
+            <label for="people-target">Target company</label>
+            <select id="people-target"><option value="">All targets</option></select>
+          </div>
+          <div class="field">
+            <label for="people-min-score">Minimum score</label>
+            <input id="people-min-score" type="number" min="0" max="100" step="1" value="0">
+          </div>
+          <div class="field">
+            <label for="people-status">Verification status</label>
+            <select id="people-status">
+              <option value="">Any status</option>
+              <option value="unverified">Unverified</option>
+              <option value="profile_only">Profile only</option>
+              <option value="email_verified">Email verified</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-primary" id="people-apply-filters">Filter people</button>
+        </div>
+        <div id="people-list" class="grid"></div>
+      </div>
+      <div class="block">
+        <h2>Logged-in LinkedIn scan</h2>
+        <div class="card-muted">
+          <p>The LinkedIn scan with your own session runs only from the terminal, with a hard limit of 10 profiles per target. Nothing on this page opens LinkedIn on your behalf.</p>
+          <pre><code>uv run python reach/linkedin_people_scan.py --target &lt;name&gt; --limit 10</code></pre>
+          <p class="meta" style="margin-top: var(--space-2)">Safety note: the scan reads public profile text visible to your account and stores it locally. It never sends connection requests or messages.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-jobs" aria-labelledby="page-title">
+      <div class="page-head">
+        <p class="lede">AI, Cloud and Data roles in Morocco collected by the radar. Each row can seed a target company.</p>
+      </div>
+      <div class="block">
+        <div class="toolbar">
+          <div class="field">
+            <span class="legend" id="jobs-kind-label">Role kind</span>
+            <div class="segmented" role="group" aria-labelledby="jobs-kind-label">
+              <button type="button" class="btn btn-secondary" data-kind="internship" aria-pressed="true">Internships</button>
+              <button type="button" class="btn btn-secondary" data-kind="job" aria-pressed="false">Jobs</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="jobs-family">Role family</label>
+            <select id="jobs-family">
+              <option value="">All families</option>
+              <option value="ai">AI</option>
+              <option value="cloud">Cloud</option>
+              <option value="data">Data</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="jobs-search">Search title or company</label>
+            <input id="jobs-search" type="search" autocomplete="off">
+          </div>
+          <button type="button" class="btn btn-primary" id="jobs-apply-filters">Filter jobs</button>
+        </div>
+        <div id="jobs-table"></div>
+        <div class="pager" id="jobs-pager"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-runs" aria-labelledby="page-title">
+      <div class="page-head">
+        <p class="lede">Background collectors. Each run is recorded here with its status and details.</p>
+      </div>
+      <div class="block">
+        <div class="actions" style="margin-top: 0">
+          <button type="button" class="btn btn-primary" id="run-radar">Run Morocco job radar</button>
+          <button type="button" class="btn btn-secondary" id="run-people">Find people on public web</button>
+        </div>
+        <p class="error" id="runs-error" role="alert"></p>
+      </div>
+      <div class="block">
+        <h2>Run history</h2>
+        <ul class="runs-list" id="runs-list"></ul>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var ROUTES = {
+    targets: 'Targets',
+    people: 'People',
+    jobs: 'Morocco Jobs',
+    runs: 'Runs'
+  };
+  var PAGE_SIZE = 25;
+  var state = {
+    targets: null,
+    people: null,
+    jobs: null,
+    runs: null,
+    jobsKind: 'internship',
+    jobsPage: 0,
+    peopleQuery: {}
+  };
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (key) {
+        if (key === 'text') {
+          node.textContent = attrs[key];
+        } else if (key === 'className') {
+          node.className = attrs[key];
+        } else if (attrs[key] !== null && attrs[key] !== undefined) {
+          node.setAttribute(key, attrs[key]);
+        }
+      });
+    }
+    if (children) {
+      children.forEach(function (child) {
+        if (child === null || child === undefined) { return; }
+        node.appendChild(typeof child === 'string' ? document.createTextNode(child) : child);
+      });
+    }
+    return node;
+  }
+
+  function clear(node) {
+    while (node.firstChild) { node.removeChild(node.firstChild); }
+  }
+
+  function api(method, path, body) {
+    var options = { method: method, headers: {} };
+    if (body !== undefined) {
+      options.headers['Content-Type'] = 'application/json';
+      options.body = JSON.stringify(body);
+    }
+    return fetch(path, options).then(function (response) {
+      return response.text().then(function (text) {
+        var data = null;
+        try { data = text ? JSON.parse(text) : null; } catch (error) { data = null; }
+        if (!response.ok) {
+          var message = (data && data.error) ? data.error : ('Request failed (' + response.status + ')');
+          var failure = new Error(message);
+          failure.status = response.status;
+          throw failure;
+        }
+        return data;
+      });
+    });
+  }
+
+  function toast(message) {
+    var node = document.getElementById('toast');
+    node.textContent = message;
+    node.classList.add('show');
+    window.clearTimeout(toast.timer);
+    toast.timer = window.setTimeout(function () { node.classList.remove('show'); }, 4000);
+  }
+
+  function badgeFor(status) {
+    var words = { profile_only: 'profile only', email_verified: 'email verified', unverified: 'unverified' };
+    var tones = { profile_only: 'badge-warning', email_verified: 'badge-success', unverified: 'badge' };
+    var key = status || 'unverified';
+    var text = words[key] || String(key).replace(/_/g, ' ');
+    var tone = tones[key] || '';
+    return el('span', { className: 'badge ' + (tone === 'badge' ? '' : tone), text: text });
+  }
+
+  function emptyState(sentence) {
+    return el('div', { className: 'card-muted', text: sentence });
+  }
+
+  function formatDate(value) {
+    if (!value) { return ''; }
+    return String(value).slice(0, 16).replace('T', ' ');
+  }
+
+  function externalLink(href, text) {
+    return el('a', { href: href, target: '_blank', rel: 'noopener', text: text });
+  }
+
+  /* Targets */
+  function renderTargets() {
+    var list = document.getElementById('targets-list');
+    clear(list);
+    if (!state.targets) { return; }
+    if (state.targets.length === 0) {
+      list.appendChild(emptyState('No target companies yet. Add one above to start looking for people.'));
+      return;
+    }
+    state.targets.forEach(function (target) {
+      var card = el('article', { className: 'card' });
+      card.appendChild(el('h3', { text: target.name, title: target.name, className: 'person-name' }));
+      var meta = [target.sector, target.country].filter(Boolean).join(', ');
+      if (meta) { card.appendChild(el('p', { className: 'meta', text: meta })); }
+      var badges = el('div', { className: 'badges' });
+      badges.appendChild(el('span', { className: 'badge', text: 'intent: ' + (target.intent || 'both') }));
+      if (target.priority !== null && target.priority !== undefined) {
+        badges.appendChild(el('span', { className: 'badge', text: 'priority ' + target.priority }));
+      }
+      card.appendChild(badges);
+      if (target.notes) { card.appendChild(el('p', { className: 'quote', text: target.notes })); }
+      var actions = el('div', { className: 'actions' });
+      var link = el('a', { href: '#/people?target=' + encodeURIComponent(target.id), className: 'btn btn-secondary', text: 'Show people at ' + target.name });
+      actions.appendChild(link);
+      card.appendChild(actions);
+      list.appendChild(card);
+    });
+    fillTargetSelect();
+  }
+
+  function fillTargetSelect() {
+    var select = document.getElementById('people-target');
+    var current = select.value;
+    clear(select);
+    select.appendChild(el('option', { value: '', text: 'All targets' }));
+    (state.targets || []).forEach(function (target) {
+      select.appendChild(el('option', { value: target.id, text: target.name }));
+    });
+    select.value = current;
+  }
+
+  function loadTargets() {
+    return api('GET', '/api/reach/targets').then(function (rows) {
+      state.targets = Array.isArray(rows) ? rows : [];
+      renderTargets();
+    }).catch(function (error) {
+      state.targets = [];
+      renderTargets();
+      document.getElementById('target-error').textContent = 'Could not load targets: ' + error.message;
+    });
+  }
+
+  document.getElementById('target-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    var nameInput = document.getElementById('target-name');
+    var errorNode = document.getElementById('target-error');
+    var button = event.target.querySelector('button[type="submit"]');
+    var name = nameInput.value.trim();
+    errorNode.textContent = '';
+    if (!name) {
+      errorNode.textContent = 'Enter a company name first.';
+      nameInput.focus();
+      return;
+    }
+    button.setAttribute('aria-busy', 'true');
+    button.textContent = 'Adding target company';
+    api('POST', '/api/reach/targets', { name: name, intent: document.getElementById('target-intent').value })
+      .then(function () {
+        nameInput.value = '';
+        toast('Target added.');
+        return loadTargets();
+      })
+      .catch(function (error) { errorNode.textContent = error.message; })
+      .then(function () {
+        button.removeAttribute('aria-busy');
+        button.textContent = 'Add target company';
+      });
+  });
+
+  /* People */
+  function peopleQueryString() {
+    var params = [];
+    var target = document.getElementById('people-target').value;
+    var minScore = document.getElementById('people-min-score').value;
+    var status = document.getElementById('people-status').value;
+    if (target) { params.push('target=' + encodeURIComponent(target)); }
+    if (minScore && Number(minScore) > 0) { params.push('min_score=' + encodeURIComponent(minScore)); }
+    if (status) { params.push('status=' + encodeURIComponent(status)); }
+    return params.length ? '?' + params.join('&') : '';
+  }
+
+  function loadPeople() {
+    var list = document.getElementById('people-list');
+    return api('GET', '/api/reach/people' + peopleQueryString()).then(function (rows) {
+      state.people = Array.isArray(rows) ? rows : [];
+      renderPeople();
+    }).catch(function (error) {
+      clear(list);
+      list.appendChild(emptyState('Could not load people: ' + error.message));
+    });
+  }
+
+  function renderPeople() {
+    var list = document.getElementById('people-list');
+    clear(list);
+    if (!state.people) { return; }
+    if (state.people.length === 0) {
+      list.appendChild(emptyState('No people found yet. Run the public web finder from the Runs page or widen the filters.'));
+      return;
+    }
+    state.people.forEach(function (person) { list.appendChild(personCard(person)); });
+  }
+
+  function personCard(person) {
+    var card = el('article', { className: 'card' });
+    var head = el('div', { className: 'page-head', style: 'margin-bottom: 0; align-items: flex-start' });
+    head.appendChild(el('h3', { className: 'person-name', title: person.name || '', text: person.name || 'Unnamed person' }));
+    head.appendChild(el('span', { className: 'badge', text: 'score ' + (person.score === null || person.score === undefined ? '?' : person.score) }));
+    card.appendChild(head);
+    if (person.headline) { card.appendChild(el('p', { className: 'meta', text: person.headline })); }
+    var role = [person.role_seen, person.company_seen].filter(Boolean).join(' at ');
+    if (role) { card.appendChild(el('p', { text: role })); }
+    if (person.target_name) { card.appendChild(el('p', { className: 'meta', text: 'Target: ' + person.target_name })); }
+
+    var badges = el('div', { className: 'badges' });
+    badges.appendChild(badgeFor(person.verification_status));
+    if (person.discovered_via) { badges.appendChild(el('span', { className: 'badge', text: 'via ' + String(person.discovered_via).replace(/_/g, ' ') })); }
+    if (person.current_role_confirmed_at) { badges.appendChild(el('span', { className: 'badge badge-success', text: 'role confirmed' })); }
+    if (person.promoted_contact_id) { badges.appendChild(el('span', { className: 'badge badge-success', text: 'promoted to contact' })); }
+    card.appendChild(badges);
+
+    var links = el('p', { style: 'margin-top: var(--space-2)' });
+    if (person.profile_url) { links.appendChild(externalLink(person.profile_url, 'Public profile')); }
+    if (person.profile_url && person.evidence_url) { links.appendChild(document.createTextNode(' ')); }
+    if (person.evidence_url) { links.appendChild(externalLink(person.evidence_url, 'Evidence page')); }
+    if (links.childNodes.length) { card.appendChild(links); }
+    if (person.evidence_quote) { card.appendChild(el('blockquote', { className: 'quote', text: person.evidence_quote })); }
+    if (person.email) { card.appendChild(el('p', { className: 'meta', text: 'Email on file: ' + person.email })); }
+
+    var error = el('p', { className: 'error', role: 'alert' });
+    var actions = el('div', { className: 'actions' });
+    var confirmButton = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Confirm current role' });
+    var promoteButton = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Promote to contact' });
+    var draftButton = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Copy LinkedIn draft' });
+    if (person.current_role_confirmed_at) {
+      confirmButton.setAttribute('aria-pressed', 'true');
+    }
+    if (!person.current_role_confirmed_at) {
+      promoteButton.disabled = true;
+      promoteButton.setAttribute('aria-disabled', 'true');
+      promoteButton.title = 'Confirm current role first';
+    } else if (person.promoted_contact_id) {
+      promoteButton.disabled = true;
+      promoteButton.setAttribute('aria-disabled', 'true');
+      promoteButton.title = 'Already promoted to a contact';
+    }
+    if (!person.promoted_contact_id) {
+      draftButton.title = 'Promote to contact first';
+    }
+
+    confirmButton.addEventListener('click', function () {
+      error.textContent = '';
+      confirmButton.setAttribute('aria-busy', 'true');
+      confirmButton.textContent = 'Confirming current role';
+      api('POST', '/api/reach/people/' + encodeURIComponent(person.id) + '/confirm-role', { confirmed: true })
+        .then(function () { toast('Current role confirmed.'); return loadPeople(); })
+        .catch(function (failure) {
+          error.textContent = failure.message;
+          confirmButton.removeAttribute('aria-busy');
+          confirmButton.textContent = 'Confirm current role';
+        });
+    });
+
+    promoteButton.addEventListener('click', function () {
+      error.textContent = '';
+      promoteButton.setAttribute('aria-busy', 'true');
+      promoteButton.textContent = 'Promoting to contact';
+      api('POST', '/api/reach/people/' + encodeURIComponent(person.id) + '/promote')
+        .then(function () { toast('Promoted to contact.'); return loadPeople(); })
+        .catch(function (failure) {
+          error.textContent = failure.status === 409 ? 'Already promoted, or the role is not confirmed yet.' : failure.message;
+          promoteButton.removeAttribute('aria-busy');
+          promoteButton.textContent = 'Promote to contact';
+        });
+    });
+
+    draftButton.addEventListener('click', function () {
+      error.textContent = '';
+      var fact = person.evidence_quote || person.role_seen || person.headline || '';
+      draftButton.setAttribute('aria-busy', 'true');
+      draftButton.textContent = 'Copying LinkedIn draft';
+      api('POST', '/api/reach/people/' + encodeURIComponent(person.id) + '/draft', { lang: 'en', fact: fact, channel: 'linkedin' })
+        .then(function (result) {
+          var body = result && result.body ? result.body : '';
+          var copy = (navigator.clipboard && navigator.clipboard.writeText)
+            ? navigator.clipboard.writeText(body)
+            : Promise.reject(new Error('Clipboard is not available in this browser.'));
+          return copy.then(function () { toast('Draft copied. Nothing was sent.'); });
+        })
+        .catch(function (failure) {
+          error.textContent = failure.status === 409 ? 'Promote to contact before drafting.' : failure.message;
+        })
+        .then(function () {
+          draftButton.removeAttribute('aria-busy');
+          draftButton.textContent = 'Copy LinkedIn draft';
+        });
+    });
+
+    actions.appendChild(confirmButton);
+    actions.appendChild(promoteButton);
+    actions.appendChild(draftButton);
+    card.appendChild(actions);
+    card.appendChild(error);
+    return card;
+  }
+
+  document.getElementById('people-apply-filters').addEventListener('click', function () { loadPeople(); });
+
+  /* Jobs */
+  function jobsQueryString() {
+    var params = ['kind=' + encodeURIComponent(state.jobsKind)];
+    var family = document.getElementById('jobs-family').value;
+    var q = document.getElementById('jobs-search').value.trim();
+    if (family) { params.push('family=' + encodeURIComponent(family)); }
+    if (q) { params.push('q=' + encodeURIComponent(q)); }
+    return '?' + params.join('&');
+  }
+
+  function loadJobs() {
+    var wrap = document.getElementById('jobs-table');
+    return api('GET', '/api/reach/jobs' + jobsQueryString()).then(function (rows) {
+      state.jobs = Array.isArray(rows) ? rows : [];
+      state.jobsPage = 0;
+      renderJobs();
+    }).catch(function (error) {
+      clear(wrap);
+      clear(document.getElementById('jobs-pager'));
+      wrap.appendChild(emptyState('Could not load jobs: ' + error.message));
+    });
+  }
+
+  function renderJobs() {
+    var wrap = document.getElementById('jobs-table');
+    var pager = document.getElementById('jobs-pager');
+    clear(wrap);
+    clear(pager);
+    if (!state.jobs) { return; }
+    if (state.jobs.length === 0) {
+      wrap.appendChild(emptyState('No radar jobs match yet. Run the Morocco job radar from the Runs page.'));
+      return;
+    }
+    var start = state.jobsPage * PAGE_SIZE;
+    var slice = state.jobs.slice(start, start + PAGE_SIZE);
+    var table = el('table');
+    var thead = el('thead');
+    var headRow = el('tr');
+    ['Title', 'Company', 'Location', 'Posted', 'Source', 'Action'].forEach(function (label) {
+      headRow.appendChild(el('th', { scope: 'col', text: label }));
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+    var tbody = el('tbody');
+    slice.forEach(function (job) {
+      var row = el('tr');
+      var titleCell = el('td');
+      titleCell.appendChild(job.url ? externalLink(job.url, job.title || 'Untitled role') : el('span', { text: job.title || 'Untitled role' }));
+      row.appendChild(titleCell);
+      row.appendChild(el('td', { text: job.company || '' }));
+      row.appendChild(el('td', { text: job.location || '' }));
+      row.appendChild(el('td', { text: formatDate(job.publication_date) }));
+      row.appendChild(el('td', { text: job.source || '' }));
+      var actionCell = el('td');
+      var find = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Find people here', 'aria-label': 'Find people at ' + (job.company || 'this company') });
+      find.addEventListener('click', function () {
+        find.setAttribute('aria-busy', 'true');
+        api('POST', '/api/reach/targets', { name: job.company || job.title, intent: state.jobsKind })
+          .then(function (target) {
+            state.targets = null;
+            location.hash = '#/people?target=' + encodeURIComponent(target.id);
+          })
+          .catch(function (error) { toast('Could not add target: ' + error.message); })
+          .then(function () { find.removeAttribute('aria-busy'); });
+      });
+      actionCell.appendChild(find);
+      row.appendChild(actionCell);
+      tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+    var scroller = el('div', { className: 'table-wrap' });
+    scroller.appendChild(table);
+    wrap.appendChild(scroller);
+
+    var pages = Math.ceil(state.jobs.length / PAGE_SIZE);
+    if (pages > 1) {
+      var prev = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Previous page' });
+      var next = el('button', { type: 'button', className: 'btn btn-secondary', text: 'Next page' });
+      prev.disabled = state.jobsPage === 0;
+      next.disabled = state.jobsPage >= pages - 1;
+      prev.addEventListener('click', function () { state.jobsPage -= 1; renderJobs(); });
+      next.addEventListener('click', function () { state.jobsPage += 1; renderJobs(); });
+      pager.appendChild(prev);
+      pager.appendChild(el('span', { className: 'meta', text: 'Page ' + (state.jobsPage + 1) + ' of ' + pages + ', ' + state.jobs.length + ' roles' }));
+      pager.appendChild(next);
+    } else {
+      pager.appendChild(el('span', { className: 'meta', text: state.jobs.length + ' roles' }));
+    }
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.segmented [data-kind]'), function (button) {
+    button.addEventListener('click', function () {
+      state.jobsKind = button.getAttribute('data-kind');
+      Array.prototype.forEach.call(document.querySelectorAll('.segmented [data-kind]'), function (other) {
+        other.setAttribute('aria-pressed', other === button ? 'true' : 'false');
+      });
+      loadJobs();
+    });
+  });
+  document.getElementById('jobs-apply-filters').addEventListener('click', function () { loadJobs(); });
+  document.getElementById('jobs-search').addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') { event.preventDefault(); loadJobs(); }
+  });
+
+  /* Runs */
+  function loadRuns() {
+    var list = document.getElementById('runs-list');
+    return api('GET', '/api/reach/runs').then(function (rows) {
+      state.runs = Array.isArray(rows) ? rows : [];
+      renderRuns();
+    }).catch(function (error) {
+      clear(list);
+      list.appendChild(el('li', { className: 'card-muted', text: 'Could not load runs: ' + error.message }));
+    });
+  }
+
+  function renderRuns() {
+    var list = document.getElementById('runs-list');
+    clear(list);
+    if (!state.runs) { return; }
+    if (state.runs.length === 0) {
+      list.appendChild(el('li', { className: 'card-muted', text: 'No runs recorded yet. Start one with the buttons above.' }));
+      return;
+    }
+    state.runs.forEach(function (run) {
+      var item = el('li');
+      item.appendChild(el('strong', { text: String(run.run_type || 'run').replace(/_/g, ' ') }));
+      var tone = run.status === 'done' || run.status === 'finished' || run.status === 'ok' ? 'badge badge-success'
+        : run.status === 'failed' || run.status === 'error' ? 'badge badge-danger'
+        : run.status === 'running' || run.status === 'queued' ? 'badge badge-warning' : 'badge';
+      item.appendChild(el('span', { className: tone, text: run.status || 'unknown' }));
+      item.appendChild(el('span', { className: 'meta', text: formatDate(run.started_at) + (run.finished_at ? ' to ' + formatDate(run.finished_at) : '') }));
+      if (run.details) {
+        var details = typeof run.details === 'string' ? run.details : JSON.stringify(run.details);
+        item.appendChild(el('span', { className: 'meta', text: details.slice(0, 200) }));
+      }
+      list.appendChild(item);
+    });
+  }
+
+  function startRun(stage, button, label) {
+    var error = document.getElementById('runs-error');
+    error.textContent = '';
+    button.setAttribute('aria-busy', 'true');
+    button.textContent = 'Starting ' + label;
+    api('POST', '/api/reach/run', { stage: stage })
+      .then(function () { toast('Run started.'); return loadRuns(); })
+      .catch(function (failure) {
+        error.textContent = failure.status === 429 ? 'A run is already in progress. Wait for it to finish.' : failure.message;
+      })
+      .then(function () {
+        button.removeAttribute('aria-busy');
+        button.textContent = label;
+      });
+  }
+  document.getElementById('run-radar').addEventListener('click', function () {
+    startRun('radar', this, 'Run Morocco job radar');
+  });
+  document.getElementById('run-people').addEventListener('click', function () {
+    startRun('people_public', this, 'Find people on public web');
+  });
+
+  /* Router */
+  function parseHash() {
+    var hash = location.hash.replace(/^#\/?/, '');
+    var parts = hash.split('?');
+    var route = parts[0] || 'targets';
+    var params = {};
+    (parts[1] || '').split('&').forEach(function (pair) {
+      if (!pair) { return; }
+      var kv = pair.split('=');
+      params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || '');
+    });
+    if (!ROUTES[route]) { route = 'targets'; }
+    return { route: route, params: params };
+  }
+
+  function route() {
+    var parsed = parseHash();
+    document.title = parsed.route === 'targets' ? 'Reach' : ROUTES[parsed.route] + ' | Reach';
+    document.getElementById('page-title').textContent = ROUTES[parsed.route];
+    Array.prototype.forEach.call(document.querySelectorAll('.page'), function (section) {
+      section.classList.toggle('active', section.id === 'page-' + parsed.route);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.nav-item'), function (item) {
+      if (item.getAttribute('data-route') === parsed.route) {
+        item.setAttribute('aria-current', 'page');
+      } else {
+        item.removeAttribute('aria-current');
+      }
+    });
+    window.scrollTo(0, 0);
+
+    if (parsed.route === 'targets') {
+      if (state.targets === null) { loadTargets(); }
+    } else if (parsed.route === 'people') {
+      var targetsReady = state.targets === null ? loadTargets() : Promise.resolve();
+      targetsReady.then(function () {
+        if (parsed.params.target) { document.getElementById('people-target').value = parsed.params.target; }
+        loadPeople();
+      });
+    } else if (parsed.route === 'jobs') {
+      if (state.jobs === null) { loadJobs(); }
+    } else if (parsed.route === 'runs') {
+      loadRuns();
+    }
+  }
+
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>

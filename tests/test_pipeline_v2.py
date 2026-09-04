@@ -342,7 +342,7 @@ class PipelineV2Tests(unittest.TestCase):
 
     def test_email_lint_contact_verification_and_company_collision_controls(self):
         good = pipeline_v2.lint_draft(
-            "email", "AI Engineer opportunity", "Hello Rita,\n\nI am writing about the AI Engineer role. Would a brief reply by email be possible?\n\nBest regards,\nJordan"
+            "email", "AI Engineer opportunity", "Hello Rita,\n\nI am writing about the AI Engineer role. Would a brief reply by email be possible?\n\nBest regards,\nMohamed"
         )
         bad = pipeline_v2.lint_draft(
             "email", "URGENT!!! FREE OFFER!!!", "Click now https://a.test https://b.test BUY NOW!!!"

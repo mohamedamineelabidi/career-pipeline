@@ -26,7 +26,7 @@ KNOWLEDGE = {
 
 CAREER_MASTER = {
     "identity": {"name": "the candidate", "location": "Rabat, Morocco",
-                 "email": "you@example.com", "phone": "+351 912345678",
+                 "email": "you@example.com", "phone": "+000 000000000",
                  "linkedin_handle": "your-linkedin-handle"},
     "data_ai_variant": {"headline": "Data Engineer | Streaming & APIs",
                         "summary": "Data Engineer building pipelines with Python. Experience spans client delivery and team leadership."},
@@ -128,7 +128,7 @@ class ImprovementLoopTests(unittest.TestCase):
             "Nous recherchons un ingénieur pour la mission avec les équipes: Python et Apache Kafka."
         )
         profile = json.loads(json.dumps(CAREER_MASTER))
-        text = ("Jordan you@example.com +351 912345678\n"
+        text = ("Mohamed you@example.com +000 000000000\n"
                 "Data Engineer Python Kafka\nSkills\nPython, Kafka\n")
         self._insert_artifact(opp_id, profile, text, language="en")
         review = recruiter_agent.run_review(

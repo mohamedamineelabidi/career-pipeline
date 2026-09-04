@@ -527,7 +527,7 @@
 
               <article class="panel guide-section" id="g-what">
                 <h3>What this platform is</h3>
-                <p>Career Pipeline is a local, private job-search command center for one person. It runs only on this computer (127.0.0.1:8786), stores everything in one SQLite file, and never sends anything on your behalf.</p>
+                <p>Career Pipeline is a local, private job-search command center for the candidate. It runs only on this computer (127.0.0.1:8786), stores everything in one SQLite file, and never sends anything on your behalf.</p>
                 <ul class="guide-list">
                   <li><strong>It finds jobs</strong> from RSS feeds, JobSpy-style boards, and pasted listings, then fetches the full description.</li>
                   <li><strong>It scores them</strong> against your real evidence profile (semantic match, skill gaps, optional Groq rubric score).</li>
@@ -679,7 +679,7 @@
   <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="false"></div>
 
   <div id="drawer-backdrop" hidden></div>
-  <aside id="drawer" hidden role="dialog" aria-modal="false" aria-labelledby="drawer-title">
+  <aside id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="drawer-title">
     <div class="drawer-head"><div><h2 id="drawer-title">Details</h2><p id="drawer-subtitle"></p><p id="drawer-listing" class="drawer-listing"></p></div><button type="button" class="drawer-close" id="drawer-close" aria-label="Close details">Close</button></div>
     <div class="drawer-tabs" role="tablist" id="drawer-tabs"></div>
     <div class="drawer-body" id="drawer-body"></div>
@@ -1615,13 +1615,35 @@
           controls.append(previewBtn);
         }
         card.dataset.opportunityId = item.opportunity_id || item.id; card.append(top, details, coverage, controls, feedback, reviewBox, improveBox, previewBox); grid.append(card);
-        if (hasCv) { queueLazy(() => loadCoverage(item, coverage)); queueLazy(() => loadImprovementRounds(item, improveBox)); }
+        if (hasCv) { observeCard(card, () => { queueLazy(() => loadCoverage(item, coverage)); queueLazy(() => loadImprovementRounds(item, improveBox)); }); }
       });
     }
 
     // Lazy per-card lookups run a few at a time so the local server stays responsive
     // for user-initiated requests such as the details drawer.
     const lazyQueue = []; let lazyActive = 0; const LAZY_LIMIT = 2;
+    // Only fetch a card's coverage and improvement rounds once the card is
+    // actually on screen. Boot used to fire two requests for every CV card
+    // (134 requests, ~7s to first render) while the user was still looking at
+    // Overview. rootMargin starts the work just before the card scrolls in, so
+    // it still feels instant.
+    const cardTasks = new WeakMap();
+    const cardObserver = ('IntersectionObserver' in window)
+      ? new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            obs.unobserve(entry.target);
+            const run = cardTasks.get(entry.target);
+            cardTasks.delete(entry.target);
+            if (run) run();
+          });
+        }, {rootMargin: '200px 0px'})
+      : null;
+    function observeCard(card, run) {
+      if (!cardObserver) { run(); return; }
+      cardTasks.set(card, run);
+      cardObserver.observe(card);
+    }
     function queueLazy(task) { lazyQueue.push(task); pumpLazy(); }
     function pumpLazy() {
       while (lazyActive < LAZY_LIMIT && lazyQueue.length) {

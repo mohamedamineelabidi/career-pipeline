@@ -1,36 +1,34 @@
-# Secrets - never commit
-.env
-.env.*
-!.env.example
-
-# Personal career data - only the .example.yaml templates are public
-reference_cv_2027/data/*.yaml
-!reference_cv_2027/data/*.example.yaml
-
-# Database and runtime state
+# Generated and private runtime state
 *.db
 *.db-shm
 *.db-wal
 *.sqlite3
 *.sqlite3-shm
 *.sqlite3-wal
+__pycache__/
+.pytest_cache/
+.venv/
+
+# Personal data, backups and browser-local artifacts
 backups/
-search_state.json
 jobs_digest*.json
+search_state.json
 linkedin_connection_drafts.json
 remote_jobs_ledger.json
-staging/
 
-# Generated CV output
+# Generated CV outputs
 out_*/
 daily_best_cv/
-cv_collection_*/
-docx_collection_*/
-master_ats_*/
+cv_collection_2027/
+docx_collection_2027/
+master_ats_2027/
 flagship_cv/
 reference_cv_2027/out/
 reference_cv_2027/out_*/
 reference_cv_2027/daily_best_cv/
+
+# Hermes plans and local agent metadata
+.hermes/
 
 # Screenshots and transient research payloads
 *.png
@@ -39,17 +37,9 @@ reference_cv_2027/daily_best_cv/
 *_matches.json
 search_logs/
 
-# Python
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.venv/
-venv/
-*.egg-info/
+# Keep source data intentionally tracked only in a private repository
 
-# Editors and OS
-.hermes/
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
+# Local sentence-transformers model cache
+.models/
+.env
+application_prep/

@@ -15,7 +15,7 @@ BASE_DOC = {
         "name": "the candidate",
         "location": "Rabat, Morocco",
         "email": "you@example.com",
-        "phone": "+351 912345678",
+        "phone": "+000 000000000",
         "photo": "aminephoto.png",
         "social_networks": [{"network": "LinkedIn", "username": "your-linkedin-handle"}],
         "sections": {
@@ -125,7 +125,7 @@ class CvRenderTests(unittest.TestCase):
         self.assertEqual(result["pages"], 1)
         text = Path(result["text_path"]).read_text(encoding="utf-8")
         self.assertIn("Upfund", text)
-        self.assertIn("+351", text)
+        self.assertIn("+212", text)
 
 
 if __name__ == "__main__":

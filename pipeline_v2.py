@@ -1887,6 +1887,14 @@ def make_handler(db_path: PathLike, static_root: PathLike):
                     raw = self.path.split("?", 1)
                     endpoint = raw[0].removeprefix("/api/")
                     query = raw[1] if len(raw) > 1 else ""
+                    # Reach (targets / public people / Morocco radar / runs): read-only here.
+                    if endpoint.startswith("reach/"):
+                        from reach import api as reach_api
+
+                        self._json(200, reach_api.handle_get(
+                            database, endpoint.removeprefix("reach/"), dict(urllib.parse.parse_qsl(query))
+                        ))
+                        return
                     # Resume-Matcher port (read-only endpoints).
                     if endpoint.startswith("cvs/") and endpoint.endswith("/highlight"):
                         import keyword_highlight
@@ -2058,6 +2066,9 @@ def make_handler(db_path: PathLike, static_root: PathLike):
                 if request_path in {"/", "/pipeline_v2.html"}:
                     page = root / "pipeline_v2.html"
                     content_type = "text/html; charset=utf-8"
+                elif request_path == "/reach.html":
+                    page = root / "reach.html"
+                    content_type = "text/html; charset=utf-8"
                 else:
                     page = (root / request_path.lstrip("/")).resolve()
                     if root not in page.parents or page.suffix.casefold() != ".pdf":
@@ -2209,6 +2220,15 @@ def make_handler(db_path: PathLike, static_root: PathLike):
 
                     record_id = unquote(path.removeprefix("/api/opportunities/").removesuffix("/applied"))
                     self._json(200, outreach_sequences.mark_applied(database, record_id, self._payload()))
+                    return
+                # Reach: targets / people gates / draft-only outreach / stage runs. Never sends.
+                if path.startswith("/api/reach/"):
+                    from reach import api as reach_api
+
+                    status, body = reach_api.handle_post(
+                        database, path.removeprefix("/api/reach/"), self._payload(), root=root
+                    )
+                    self._json(status, body)
                     return
                 if path != "/api/outcomes":
                     raise NotFoundError("endpoint not found")

@@ -33,18 +33,8 @@ from pipeline_v2 import (
 ROOT = Path(__file__).resolve().parent
 REFERENCE_ROOT = ROOT / "reference_cv_2027"
 KNOWLEDGE_PATH = REFERENCE_ROOT / "data" / "tailoring_knowledge.yaml"
-def _profile_path(base, filename):
-    """Return the personal profile file, or the shipped example when absent."""
-    import pathlib as _pathlib
-    real = _pathlib.Path(base) / filename
-    if real.exists():
-        return real
-    example = _pathlib.Path(base) / filename.replace(".yaml", ".example.yaml")
-    return example if example.exists() else real
-
-
-EVIDENCE_REGISTER_PATH = _profile_path(REFERENCE_ROOT / "data", "evidence_register.yaml")
-CAREER_MASTER_PATH = _profile_path(REFERENCE_ROOT / "data", "career_master.yaml")
+EVIDENCE_REGISTER_PATH = REFERENCE_ROOT / "data" / "evidence_register.yaml"
+CAREER_MASTER_PATH = REFERENCE_ROOT / "data" / "career_master.yaml"
 IMPROVED_DIR = REFERENCE_ROOT / "out" / "tailored" / "improved"
 REVIEW_SCHEMA_VERSION = 2
 RECOMMENDATIONS = ("ready_to_send", "needs_edits", "regenerate")

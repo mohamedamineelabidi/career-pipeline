@@ -26,19 +26,9 @@ from pipeline_v2 import NotFoundError, PathLike, connect
 
 ROOT = Path(__file__).resolve().parent
 REFERENCE_DATA = ROOT / "reference_cv_2027" / "data"
-def _profile_path(base, filename):
-    """Return the personal profile file, or the shipped example when absent."""
-    import pathlib as _pathlib
-    real = _pathlib.Path(base) / filename
-    if real.exists():
-        return real
-    example = _pathlib.Path(base) / filename.replace(".yaml", ".example.yaml")
-    return example if example.exists() else real
-
-
-CAREER_MASTER_PATH = _profile_path(REFERENCE_DATA, "career_master.yaml")
-EVIDENCE_REGISTER_PATH = _profile_path(REFERENCE_DATA, "evidence_register.yaml")
-KNOWLEDGE_PATH = _profile_path(REFERENCE_DATA, "tailoring_knowledge.yaml")
+CAREER_MASTER_PATH = REFERENCE_DATA / "career_master.yaml"
+EVIDENCE_REGISTER_PATH = REFERENCE_DATA / "evidence_register.yaml"
+KNOWLEDGE_PATH = REFERENCE_DATA / "tailoring_knowledge.yaml"
 TAXONOMY_PATH = semantic_match.TAXONOMY_PATH
 
 ACCEPTED = semantic_match.ACCEPTED_EVIDENCE_STATUSES

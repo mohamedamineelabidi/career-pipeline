@@ -1,0 +1,7 @@
+#!/bin/sh
+# Publish the public-safe copy after every commit in the private repo.
+# Runs in the background and never blocks or fails the commit itself.
+cd "$(git rev-parse --show-toplevel)" || exit 0
+LOG="${LOCALAPPDATA:-/tmp}/Temp/publish_public.log"
+uv run python scripts/publish_public.py >> "$LOG" 2>&1 &
+exit 0
