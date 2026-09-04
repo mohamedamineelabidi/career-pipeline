@@ -1,0 +1,13 @@
+{
+  "AI Agents & LLMs":        {"tiles": ["64:46","64:52","64:53","64:55","64:56","64:98"], "icons": ["langchain.svg","dv_python-original.svg","googlegemini.svg","qdrant.svg","huggingface.svg","ollama.svg"]},
+  "Backend & APIs":          {"tiles": ["71:249","70:234","70:236","70:242"], "icons": ["dv_fastapi-original.svg","dv_sqlalchemy-original.svg","celery.svg","pydantic.svg"]},
+  "Computer Vision":         {"tiles": ["68:93","68:95","68:97","68:100","68:103"], "icons": ["dv_opencv-original.svg","onnx.svg","dv_pytorch-original.svg","dv_numpy-original.svg","dv_tensorflow-original.svg"]},
+  "Voice & Multimodal AI":   {"tiles": ["70:158"], "icons": ["openai_white.svg"]},
+  "Cloud & DevOps":          {"tiles": ["75:164","75:166","75:168","75:171"], "icons": ["dv_docker-original.svg","dv_azure-original.svg","dv_googlecloud-original.svg","dv_amazonwebservices-plain-wordmark.svg"]},
+  "Machine Learning":        {"tiles": ["76:234","76:236"], "icons": ["dv_scikitlearn-original.svg","dv_pandas-original.svg"]},
+  "Programming Languages":   {"tiles": ["71:278","71:280","71:284"], "icons": ["dv_python-original.svg","dv_typescript-original.svg","javascript.svg"]},
+  "Databases & Vector Stores": {"tiles": ["71:387","71:389","71:391","71:488"], "icons": ["dv_postgresql-original.svg","qdrant.svg","dv_cassandra-original.svg","googlebigquery.svg"]},
+  "Frontend":                {"tiles": ["71:494"], "icons": ["dv_react-original.svg"]},
+  "Automation & Integrations": {"tiles": ["71:511","71:521"], "icons": ["n8n.svg","whatsapp.svg"]},
+  "BI & Analytics":          {"tiles": ["75:145"], "icons": ["dv_grafana-original.svg"]}
+}
