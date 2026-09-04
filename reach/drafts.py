@@ -140,6 +140,57 @@ def persona(person: dict) -> str:
     return "peer"
 
 
+# --- Hook: one sentence built from the person's own evidence ----------------
+
+_HOOK_MAX_WORDS = 8
+_SCHOOL_WORDS = ("ensah", "alumni", "alumnus", "alumna", "ecole", "école", "university", "université",
+                 "school", "phd", "msc", "ingénieur d'état", "graduate", "diplôm")
+_COMPANY_SPLIT = re.compile(r"\s+(?:@|at|chez)\s+", re.IGNORECASE)
+
+
+def _split_role_company(text: str) -> tuple[str, str]:
+    parts = _COMPANY_SPLIT.split(text, maxsplit=1)
+    role = parts[0].strip(" .")
+    company = parts[1].strip(" .") if len(parts) > 1 else ""
+    return role, company
+
+
+def _usable(segment: str) -> bool:
+    words = segment.split()
+    if not words or len(words) > _HOOK_MAX_WORDS:
+        return False
+    lowered = segment.lower()
+    return not any(word in lowered for word in _SCHOOL_WORDS)
+
+
+def hook(person: dict, lang: str, company: str | None = None) -> str:
+    """One short clause about the person, or '' when the evidence gives nothing safe.
+
+    Prefers a headline segment after '|' or ',' that names a function
+    ("Talent Management"); otherwise falls back to role_seen (or the first
+    headline segment) plus the company. Never repeats more than eight words
+    of the evidence and never quotes evidence_quote.
+    """
+    lang = "fr" if str(lang).lower().startswith("fr") else "en"
+    headline = " ".join(str(person.get("headline") or "").split())
+    segments = [s.strip(" .") for s in re.split(r"\s*[|,]\s*", headline) if s.strip(" .")]
+    head_role, head_company = _split_role_company(segments[0]) if segments else ("", "")
+    company = (company or person.get("company_seen") or head_company or person.get("target_name") or "").strip()
+    function = next((s for s in segments[1:] if _usable(s) and not _COMPANY_SPLIT.search(s)), "")
+    if function and company:
+        if lang == "fr":
+            return f"j'ai vu que vous pilotez le {function} chez {company}"
+        return f"I saw that you lead {function} at {company}"
+    role = str(person.get("role_seen") or "").strip() or head_role
+    role, role_company = _split_role_company(role)
+    company = company or role_company
+    if not _usable(role):
+        return ""
+    if lang == "fr":
+        return f"j'ai vu que vous êtes {role} chez {company}" if company else f"j'ai vu que vous êtes {role}"
+    return f"I saw that you are {role} at {company}" if company else f"I saw that you are {role}"
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 

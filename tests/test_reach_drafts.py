@@ -128,6 +128,32 @@ class LintTests(unittest.TestCase):
             drafts.lint("x", channel="fax")
 
 
+class HookTests(unittest.TestCase):
+    def test_hook_uses_the_persons_evidence_not_a_template(self):
+        p = {"name": "Kenza Akli", "headline": "Deputy HR Director @ Deloitte | Talent Management",
+             "evidence_quote": "Kenza has led the talent management team since September 2025 across offices."}
+        self.assertEqual(drafts.hook(p, "fr"), "j'ai vu que vous pilotez le Talent Management chez Deloitte")
+        self.assertEqual(drafts.hook(p, "en"), "I saw that you lead Talent Management at Deloitte")
+
+    def test_hook_falls_back_to_role_seen_and_company(self):
+        p = {"name": "Amina Tazi", "headline": "", "role_seen": "Head of Data", "company_seen": "Acme Robotics"}
+        self.assertEqual(drafts.hook(p, "fr"), "j'ai vu que vous êtes Head of Data chez Acme Robotics")
+        self.assertEqual(drafts.hook(p, "en"), "I saw that you are Head of Data at Acme Robotics")
+        self.assertEqual(drafts.hook(p, "en", company="Acme"), "I saw that you are Head of Data at Acme")
+
+    def test_hook_skips_school_segments_and_long_text(self):
+        self.assertEqual(drafts.hook({"headline": "Consultant chez KPMG, ENSAH alumni"}, "fr"),
+                         "j'ai vu que vous êtes Consultant chez KPMG")
+        self.assertEqual(drafts.hook({"headline": " ".join(["word"] * 9)}, "en"), "")
+        self.assertEqual(drafts.hook({"headline": "Data | " + " ".join(["word"] * 9)}, "en"), "I saw that you are Data")
+
+    def test_hook_returns_empty_when_nothing_usable(self):
+        self.assertEqual(drafts.hook({}, "fr"), "")
+        self.assertEqual(drafts.hook({"evidence_quote": "a very long quote about nothing in particular here"}, "en"), "")
+        for text in (drafts.hook({"headline": "Partner"}, "fr"),):
+            self.assertNotIn("—", text)
+
+
 class SaveDraftTests(unittest.TestCase):
     def setUp(self):
         self._dir = tempfile.TemporaryDirectory()
